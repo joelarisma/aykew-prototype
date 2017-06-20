@@ -1,0 +1,46 @@
+
+/* Two Point Training */
+.twopoint_training_box { margin-top: 5px; }
+.line_box { margin:0 50px; line-height: 45px; text-align: justify; color: #ccc; }
+.twoleft { position: absolute; top: 90px; left: 15px; list-style: none; }
+.tworight { position: absolute; top: 90px ; right: 50px; list-style: none; }
+.listing_line ul li { background: black; color: white; line-height: 25px; width: 25px; text-align: center; margin-bottom: 20px; font-size: 12px; }
+.two-point-gif { width: 100%; }
+
+#selectAnswer {
+    position: absolute;
+    top: -17px;
+    left: 0px;
+    right: 0px;
+    margin-left: auto;
+    margin-right: auto;
+    display: block;
+    text-align: center;}
+
+.helpbtn {
+    background: #008CC8;
+    border-radius: 50%;
+    width: 20px;
+    display: inline-block;
+    text-decoration: none;
+    color: #FFF;
+    line-height: 20px;
+}
+
+.bottom_caption_sec_2pt {
+    position: absolute;
+    bottom: 20px;
+    right: 0px;
+    left: 0px;
+}
+
+.button_positon {
+    width: 100%;
+    text-align: center;
+}
+
+@media screen and (orientation:landscape) and (max-height:479px) {
+    .bottom_caption_sec_2pt {
+        bottom: 0px;
+    }
+}
