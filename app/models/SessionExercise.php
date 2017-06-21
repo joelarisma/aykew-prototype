@@ -12,4 +12,9 @@ class SessionExercise extends Eloquent {
 			'reference_table',
 			'exercise_id'
 		];
+
+	public function type()
+	{
+		return $this->belongsTo('SessionExerciseType', 'session_exercise_type_id', 'id');
+	}
 }

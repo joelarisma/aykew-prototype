@@ -328,4 +328,20 @@ class UserSessionHandler {
 		
 		return $_exercises;
 	}
+
+	public function getReadingExercise(SessionExercise $exercise)
+	{
+        $exclude = SessionReport::select('session_exercise_id')
+        				->where('user_id', $this->user->id)
+        				->where('session_exercise_type_id', $exercise->type->id)
+        				->where('session_id', $this->session->id)
+        				->get()->toArray();
+        				
+		$type = $exercise->type->type_code == 'post-test' ? 'Post-Reading' : 'Pre-Reading';
+
+		return PostTest::where('type', '=', $type)
+				->where('status', '=', 1)
+				->whereNotIn('id', $exclude)
+				->get()->random(1);
+	}
 }	

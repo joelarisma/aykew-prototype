@@ -40,7 +40,16 @@ Route::post('/session/{session_level}', function($session_level) {
 	if($exercise === true)
 		return Redirect::to('/session/new');
 
-	dd($exercise);
+	switch($exercise->type->type_code)
+	{
+		case 'pre-test':
+		case 'post-test':
+			$vars = $handler->getReadingExercise($exercise);
+			return View::make('dynamic.readingspeedtest', ['test' => $vars]);
+		break;
+		case 'eye-speed':
+		break;
+	}
 });
 
 Route::get('/session/{session_level}', function($session_level) {
@@ -54,7 +63,7 @@ Route::get('/session/{session_level}', function($session_level) {
 		return Redirect::to('/session/new');
 
 
-	dd($exercise);
+	dd($exercise->type);
 });
 
 Route::get('/exercise/done', function() {

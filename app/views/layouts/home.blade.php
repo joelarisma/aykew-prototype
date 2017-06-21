@@ -16,7 +16,13 @@
 </head>
 <body>
 @yield('content')
+</script>
+<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+<script src="//netdna.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.6.2/js/bootstrap-select.min.js"></script>
+<script type="text/javascript" src="https://addevent.com/libs/atc/1.6.1/atc.min.js" async defer></script>
 <script>
+
 //Prevents backspace key, except on writables
 $(document).bind("keydown keypress", function(deleteEvent){
 
