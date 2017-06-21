@@ -1,6 +1,7 @@
 @extends('layouts.home')
 
 @section('content')
+
 <div id="page-wrapper">
     <div class="row" style="padding-top:15px;">
         <div class="col-lg-12">
@@ -57,11 +58,12 @@
         </div>
     </div>
 </div>
-<form action="/{{ $url }}/session" method="POST" id="testform">
-    <input type="hidden" name="session_id" value="{{ $session_id }}">
-    <input type="hidden" name="step" value="{{ $current_step }}">
-    <input type="hidden" name="test_id" value="{{ $test->id }}">
-    <input type="hidden" name="score" value="" id="form_score">
+<form action="{{ url('session', $session_level) }}" method="POST" id="testform">
+    <input type="hidden" name="exercise_id" value="{{ $test->id }}">
+    <input type="hidden" name="session_exercise_id" value="{{ $session_exercise->id }}">
+    <input type="hidden" name="session_exercise_type_id" value="{{ $session_exercise->type->id }}">
+    <input type="hidden" name="wordcount" value="">
+    <input type="hidden" name="seconds" value="" id="seconds">
     <input type="hidden" name="time_spend" value="{{ \Carbon\Carbon::now() }}">
 </form>
 <script>
@@ -72,6 +74,10 @@ var wordcount;
 var totalTime;
 var wordsPerMinute;
 
+//new
+var seconds = 0;
+var readTimer;
+
 $(function(){
     $('#instructions').modal('show');
     $("#start").on('click',startRead);
@@ -80,7 +86,9 @@ $(function(){
 function startRead() {
     $('#instructions').modal('hide');
     $("#start").off('click',startRead);
-    wordcount = $("#content").text().split(/\b\S+\b/g).length-1;
+
+    wordcount = {{ str_word_count(trim(str_replace('  ', ' ', strip_tags($test->description)))) }};
+    //wordcount = $("#content").text().split(/\b\S+\b/g).length-1;
     var mstime = wordcount/.033333;  // time to read at 2000 wpm
     doneColor = $("#doneBtn").css('backgroundColor');
     $("#doneBtn").prop('disabled', true);
@@ -88,8 +96,16 @@ function startRead() {
     $("#testscreen").show();
     $("#doneBtn").toggle();
     $('#instruction_screen_div').modal('toggle');
+    
+    //old
     var datestart = new Date();
     starttime = datestart.getTime()/100;
+
+    readTimer = setInterval(() => {
+            seconds++;
+            $('#show-timer').html(seconds/10);
+        }, 100);
+
     setTimeout(showDone, mstime);
 }
 
@@ -100,7 +116,7 @@ function showDone() {
     $("#doneBtn").prop('disabled', false);
 }
 
-function doneRead() {
+function _doneRead() {
     var dateend = new Date();
     var endtime = dateend.getTime()/100;
     $("#doneBtn").off('click',doneRead);
@@ -115,6 +131,24 @@ function doneRead() {
     $("#form_score").val(wordsPerMinute);
     $("#testform").submit();
 }
+
+function doneRead() {
+        $("#doneBtn").off('click', doneRead);
+        
+        if(readTimer)
+            clearInterval(readTimer);
+
+        //new
+        var wpm = Math.round((wordcount/(seconds/10)) * 60);
+        seconds = seconds/10;
+
+        $('input[name="wordcount"]').val(wordcount);
+        $('input[name="seconds"]').val(seconds);
+
+        $('#lastParagraph').html('Generating Test Questions...');
+
+        $("#testform").submit();
+    }
 
 </script>
 @stop

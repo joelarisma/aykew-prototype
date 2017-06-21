@@ -10,6 +10,7 @@
             <div class="panel panel-default posttest" id="instructions">
                 <div class="panel-body text-center">
                     <div class="col-md-8 col-md-offset-2">
+                        <span id="show-timer"></span>
                         <div id="description_div" class="blur text-justify">
                             <h4 class="test_name text-center">{{ $test->test_name }}</h4>
                             <p class="text-left">{{ $test->description }}</p>
@@ -74,8 +75,10 @@ color: rgba(0, 0, 0, 0);
 text-shadow: 0 0 20px #333;
 }
 </style>
-<form action="" method="POST" id="testform">
-    <input type="hidden" name="session_exercise_id" value="{{ $test->id }}">
+<form action="{{ url('session', $session_level) }}" method="POST" id="testform">
+    <input type="hidden" name="exercise_id" value="{{ $test->id }}">
+    <input type="hidden" name="session_exercise_id" value="{{ $session_exercise->id }}">
+    <input type="hidden" name="session_exercise_type_id" value="{{ $session_exercise->type->id }}">
     <input type="hidden" name="wordcount" value="">
     <input type="hidden" name="seconds" value="" id="seconds">
     <input type="hidden" name="time_spend" value="{{ \Carbon\Carbon::now() }}">
@@ -110,6 +113,7 @@ $(function(){
         //new
         readTimer = setInterval(() => {
             seconds++;
+            $('#show-timer').html(seconds/10);
         }, 100);
         setTimeout(showDone, mstime);
     }
@@ -129,17 +133,22 @@ $(function(){
 
         //new
         var wpm = Math.round((wordcount/(seconds/10)) * 60);
+        seconds = seconds/10;
+
+        $('input[name="wordcount"]').val(wordcount);
+        $('input[name="seconds"]').val(seconds);
 
         //old
-        var dateend = new Date();
+        /*var dateend = new Date();
         var test_end_time = dateend.getTime() / 100;
         var total_time = Math.round(test_end_time - test_start_time); // tenths-of-seconds
-        console.log(Math.round((wordcount/total_time)*600));
+        console.log(total_time/10);*/
         
         $("#words").html(wordcount);
         $("#time-span").html(seconds);
         $("#wpm").html(wpm);
         $('#speed').modal('toggle');
+
         //console.log((wordcount/seconds) * 60);
        /* if (test_start_time == 0)
             return false;

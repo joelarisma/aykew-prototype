@@ -15,8 +15,7 @@
 		@endforeach
 	</tbody>
 </table>
-<form action="{{ url('session', $current_session->session) }}" method="post" id="submit">
-	<input type="hidden" name="_token" value="<?php echo csrf_token(); ?>">
+<form action="{{ url('session', $current_session->session) }}" method="get" id="submit">
 	<button>start</button>
 </form>
 @endsection

@@ -33,6 +33,12 @@ class UserSessionHandler {
 	//current session's exercises
 	private $exercises;
 
+	//test id of the session exercise
+	private $test;
+
+	//user's current exercise
+	private $exercise;
+
 	//user's last entered report
 	private $last_report;
 
@@ -120,24 +126,6 @@ class UserSessionHandler {
 			'sessions' => $this->user_sessions,
 			'current_session' => $this->session
 		];
-	}
-
-	public function submitExercise($input = null)
-	{
-		if(!$input)
-			return [];
-
-		//evaluate exam type here
-		//check user submitted results
-		//save to database
-		SessionReport::create([
-				'session_exercise_id' 		=> 1004,
-				'session_exercise_type_id'	=> 8,
-				'user_id'					=> 1,
-				'session_id'				=> 4,
-				'exercise_id'				=> null
-			]);
-
 	}
 
 	/**
@@ -329,6 +317,93 @@ class UserSessionHandler {
 		return $_exercises;
 	}
 
+	public function submitExercise($input = null, $session_no)
+	{
+		if(!$input)
+			return [];
+
+		$this->session_no = $session_no;
+		$this->session = $this->getUserSession();
+
+		$this->exercise = SessionExercise::find($input['session_exercise_id']);
+
+		if(!$this->exercise)
+			dd('something went wrong');
+		
+		switch($this->exercise->type->type_code)
+		{
+			case 'pre-test':
+			case 'post-test':
+				$this->test = PostTest::find($input['exercise_id']);
+				$this->user_metrics['wpm'] = $this->getWordsPerMinute($input['wordcount'], $input['seconds']);
+			break;
+			case 'eye-speed':
+				$this->user_metrics['eye_power'] = $this->getEyeMusclePower($input['seconds']);
+			break;
+			case 'comprehension':
+				$this->test = PostTest::find($input['exercise_id']);
+				$this->user_metrics['wpm'] = $this->getWordsPerMinute($input['wordcount'], $input['seconds']);
+			break;
+		}
+
+		if(!$this->test && $this->exercise->type->type_code != 'eye-speed')
+			dd('double check');
+
+		//evaluate exam type here
+		//check user submitted results
+		//save to database
+		SessionReport::create([
+				'session_exercise_id' 		=> $this->exercise->id,
+				'session_exercise_type_id'	=> $this->exercise->session_exercise_type_id,
+				'user_id'					=> $this->user->id,
+				'session_id'				=> $this->exercise->session_id,
+				'exercise_id'				=> ($this->test) ? $this->test->id : null,
+				'wpm'						=> $this->user_metrics['wpm'],
+				'ers'						=> $this->user_metrics['ers'],
+				'net'						=> $this->user_metrics['net'],
+				'time_spent'				=> $this->user_metrics['time_spent'],
+				'percentage'				=> $this->user_metrics['percentage'],
+				'eye_power'					=> $this->user_metrics['eye_power'],
+			]);
+
+	}
+
+	/**
+	* calculate the words per minte
+	* 
+	* @param (int) $wordcount number of words in a content, 
+	* (float) $seconds number of second spent in reading
+	* 
+	* @return (float) words per minute
+	*
+	**/
+	public function getWordsPerMinute($wordcount, $seconds)
+	{
+		//formula for words per minute
+		return ($wordcount/$seconds) *  60;
+	}
+
+	/**
+	* calculate eye muscle power
+	* 
+	* @param (int) $seconds number of second spent in the exercise
+	* 
+	* @return (float) eye muscle power
+	*
+	**/
+	public function getEyeMusclePower($seconds)
+	{	
+		//need to clarify these magic numbers
+		return (22*5*10) / $seconds;
+	}
+
+	/**
+	* randomly gets a single reading material
+	*
+	* @param SessionExercise - must be an object from SessionExercise model
+	* @return PostTest
+	*
+	**/
 	public function getReadingExercise(SessionExercise $exercise)
 	{
         $exclude = SessionReport::select('session_exercise_id')
@@ -336,12 +411,35 @@ class UserSessionHandler {
         				->where('session_exercise_type_id', $exercise->type->id)
         				->where('session_id', $this->session->id)
         				->get()->toArray();
-        				
+
 		$type = $exercise->type->type_code == 'post-test' ? 'Post-Reading' : 'Pre-Reading';
 
-		return PostTest::where('type', '=', $type)
-				->where('status', '=', 1)
+		return PostTest::where('type', $type)
+				->where('status', 1)
 				->whereNotIn('id', $exclude)
 				->get()->random(1);
+	}
+
+	/**
+	* randomly gets a single reading material with questions
+	*
+	* @param SessionExercise - must be an object from SessionExercise model
+	* @return PostTest
+	*
+	**/
+	public function getComprehensionExercise(SessionExercise $exercise)
+	{
+		$exclude = SessionReport::select('session_exercise_id')
+        				->where('user_id', $this->user->id)
+        				->where('session_exercise_type_id', $exercise->type->id)
+        				->where('session_id', $this->session->id)
+        				->get()->toArray();
+
+        return PostTest::with(['questions'])
+	        		->has('questions')
+	        		->where('type', 'Comprehension')
+					->where('status', 1)
+					->whereNotIn('id', $exclude)
+					->get()->random(1);
 	}
 }	

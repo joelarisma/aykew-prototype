@@ -11,6 +11,11 @@ class PostTest extends Eloquent {
     {
         return $this->hasOne('Level','id','level_id');
     }
+
+    public function questions()
+    {
+        return $this->hasMany('PostTestQuestion', 'test_id', 'id');
+    }
     
     /**
      * Regenerate word count for content.  If parameter is true, do ALL

@@ -93,10 +93,17 @@
          </div>
      </div>
 
-    <form action="/{{ $url }}/session" method="POST" id="testform">
+    <!-- <form action="/{{ $url }}/session" method="POST" id="testform">
         <input type="hidden" name="session_id" value="{{ $session_id }}">
         <input type="hidden" name="step" value="{{ $current_step }}">
         <input type="hidden" name="score" value="" id="form_score">
+        <input type="hidden" name="time_spend" value="{{ \Carbon\Carbon::now() }}">
+    </form> -->
+
+    <form action="{{ url('session', $session_level) }}" method="POST" id="testform">
+        <input type="hidden" name="session_exercise_id" value="{{ $session_exercise->id }}">
+        <input type="hidden" name="session_exercise_type_id" value="{{ $session_exercise->type->id }}">
+        <input type="hidden" name="seconds" value="" id="seconds">
         <input type="hidden" name="time_spend" value="{{ \Carbon\Carbon::now() }}">
     </form>
  		    
@@ -151,13 +158,19 @@ function doneStep() {
     var time = stopTimer();
     $("#doneBtn").off('click', doneStep);
     $("#doneBtn").hide();
-    stepSec = time;
+    seconds = time / 10;
+    $("#test_time").html(seconds);
+    var score = Math.round((22*5*10) / seconds);
+    $("#test_score").html(score);
+    $("#seconds").val(seconds);
+    $("#completed").modal('show');
+    /*stepSec = time;
     $("#test_time").html(stepSec / 10);
     var score = (22*5*10) / stepSec;
     score = Math.round(score*10) / 10;
     $("#test_score").html(score);
-    $("#form_score").val(score);
-    $("#completed").modal('show');
+    //$("#form_score").val(score);
+    $("#completed").modal('show');*/
     $("#finishBtn").on('click', allDone);
 }
 
