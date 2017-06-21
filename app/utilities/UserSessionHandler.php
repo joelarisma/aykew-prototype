@@ -317,6 +317,14 @@ class UserSessionHandler {
 		return $_exercises;
 	}
 
+	/**
+	* records the exercise results
+	*
+	* @param $input[] post variables, $session_no is the current session of the user
+	*
+	* @return void
+	*
+	**/
 	public function submitExercise($input = null, $session_no)
 	{
 		if(!$input)
@@ -349,8 +357,6 @@ class UserSessionHandler {
 		if(!$this->test && $this->exercise->type->type_code != 'eye-speed')
 			dd('double check');
 
-		//evaluate exam type here
-		//check user submitted results
 		//save to database
 		SessionReport::create([
 				'session_exercise_id' 		=> $this->exercise->id,
