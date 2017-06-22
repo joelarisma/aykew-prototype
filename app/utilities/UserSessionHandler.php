@@ -12,7 +12,7 @@
  * 
  * @category Service
  * @package  EyeQ
- * @author   Joe Larisma III
+ * @author   Zylun Phils, Inc.
  * 
  */
 
@@ -21,6 +21,7 @@
 * - create a hasQuestions function return bool true | false for post-test lvl 21 and comprehension test
 * - need to clarify eye exercises speed calculations
 * - need to clarify more detailed requirements, user has certain limit to take the exercises per day except super admin
+* - need more information on section - i know at this point we are more concern of the system calculation accuracy
 * - 
 **/
 
