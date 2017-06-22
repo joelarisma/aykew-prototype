@@ -40,7 +40,7 @@ class UserSessionController extends BaseController {
 		            'speeds' 	=> [],
 		            'day' 		=> true,
 		            'tip' 		=> "",
-		            'todo'		=> true, //proceed
+		            'todo'		=> true, //proceed to next
 		            'do_comptest' 	=> false,
 		            'do_typetest' 	=> false,
 		            'do_twopoint' 	=> false,
@@ -135,7 +135,7 @@ class UserSessionController extends BaseController {
      *
      * @return Section object
      */
-    public function getLevelForSession($session)
+    public function getLevelForSession(CourseSession $session)
     {
         $package_levels = Section::where('course_id', '=', $session->course_id)
             ->where('status', '=', 1)

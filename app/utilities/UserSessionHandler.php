@@ -142,6 +142,13 @@ class UserSessionHandler {
 		];
 	}
 
+
+	/**
+	* gets exercise types
+	* 
+	* @return SessionExerciseType[]
+	*
+	**/
 	public function getExerciseTypes()
 	{
 		$types = SessionExerciseType::all();
@@ -555,8 +562,16 @@ class UserSessionHandler {
 		];
 	}
 
-	//not stated in the current document requirement
-	//the current logic will remain as it is
+	/**
+	* generates eye exercise materials
+	* - the current logic will remain as it is
+	* - the calculations are not stated in the document requirements
+	*
+	* @param SessionExercise - must be an object from SessionExercise model
+	*
+	* @return bool | array() PostTestQuestions, wpm, test_id
+	*
+	**/
 	public function getEyeExercises(SessionExercise $exercise)
 	{
 		$session_report = SessionReport::where('user_id', $this->user->id)
