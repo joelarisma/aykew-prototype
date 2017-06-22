@@ -1,0 +1,216 @@
+<style>
+#ex34 {
+    cursor: default;
+}
+.gcbtn {
+    position: absolute;
+    bottom: 10px;
+    width: 100%;
+    text-align: center;
+}
+</style>
+<div id="ex34" class='exercise-area' style="display:none;">
+    <div id="canvas_ex34">
+
+        <div id="step1Done" class="modal fade" data-backdrop="static" data-keyboard="false" id="speed" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-sm">
+                <div id="timer_div" class="modal-content">
+                    <div class="modal-header">
+		        <h4 class="modal-title text-center" id="myModalLabel"><i class="fa fa-info-circle" style="font-size:150%;"></i> Exercise 34</h4>
+                    </div>
+                    <div id="twopt-msg" class="modal-body text-center">
+                        Scan the rows again as fast as you can.<br /><br />
+                        <em>Do <strong>NOT</strong> try to read the words!</em><br><br>
+                        Press <strong>Done</strong> when you reach the last line.
+                    </div>
+                    <div class="modal-footer text-center">
+                        <input type="button" id="beginStep2" value="Begin" class="btn btn-success btn-lg btn-block"/>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="step2Done" class="modal fade" data-backdrop="static" data-keyboard="false" id="speed" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-sm">
+                <div id="timer_div" class="modal-content">
+                    <div class="modal-header">
+                        <h4 class="modal-title text-center" id="myModalLabel"><i class="fa fa-info-circle" style="font-size:150%;"></i> Exercise 34</h4>
+                    </div>
+                    <div id="twopt-msg" class="modal-body text-center">
+                        <em>You scanned <span id="lines"></span> lines in <span id="secs"></span> seconds.</em><br /><br />
+                        This time, <strong>read the words</strong>.<br /><br />
+                        Focus on speed.<br /><br />
+                        Press <strong>Done</strong> when finished.
+                    </div>
+                    <div class="modal-footer text-center">
+                        <input type="button" id="beginStep3" value="Begin" class="btn btn-success btn-lg btn-block"/>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+	<div id="step3Done" class="modal fade" data-backdrop="static" data-keyboard="false" id="speed" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div id="timer_div" class="modal-content">
+                    <div class="modal-header">
+                        <h4 class="modal-title text-center" id="myModalLabel"><i class="fa fa-info-circle" style="font-size:150%;"></i> Exercise 34</h4>
+                    </div>
+                    <div id="twopt-msg" class="modal-body text-center">
+                        <div>Today's Two-Point Training Reading Speed:</div>
+                        <div style="color: #5BC0DE;">
+                            <h2 id="wpm" style="font-size:400%;font-weight:bold;"></h2><h5>WPM</h5>
+                        </div>
+                        <br>
+			<h6>You read <span id="words"></span> words in <span id="wordsecs"></span> seconds.</em>
+                    </div>
+                    <div class="modal-footer text-center">
+                        <input type="button" id="continueBtn" value="Continue" class="closebtn btn btn-success btn-lg btn-block"/>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- training animation div start -->
+        <div id="training-animation-div" class="twopoint_training_box twopoint_training_captionbtmbox">
+            <div class="listing_line">
+                <ul class="twoleft">
+                    <li>1</li>
+                    <li>3</li>
+                    <li>5</li>
+                    <li>7</li>
+                    <li>9</li>
+                    <li>11</li>
+                    <li>13</li>
+                    <li>15</li>
+                    <li>17</li>
+                    <li>19</li>
+                    <li>21</li>
+                    <li>23</li>
+                    <li>25</li>
+                    <li>27</li>
+                    <li>29</li>
+                    <li>31</li>
+                    <li>33</li>
+                    <li>35</li>
+                    <li>37</li>
+                    <li>39</li>
+                    <li>41</li>
+                </ul>
+                <div class="line line_box" id="loremText">
+                 Lorem ipsum dolor sit amet, te sea eirmod eloquentiam. Mei cu illum scaevola, et verterem constituam mei. Tantas feugiat vis ex, unum saperet mandamus has te. Cum cibo solum recusabo et, nam saepe prompta an, mnesarchum posidonium in sed. An purto viderer persecuti vel, inani veniam recteque sed an.
+
+ Labore commune duo ex. Saperet delenit definiebas ius ei, putant copiosae invidunt te sea. Pri ei nostro eloquentiam. Eos wisi molestie instructior te, nam ne molestie delectus liberavisse, ea vim summo error iudicabit. Prima exerci equidem est no, idque ignota id vel.
+
+ Tale audiam posidonium id sit. Animal tacimates pri cu. Ad quidam oblique delectus nec, no iudico ocurreret signiferumque qui. Eos te ipsum dictas omnesque, ea vel assum inermis. Aliquid albucius ius et, an pro erant aliquam scribentur. His feugiat saperet blandit ut, usu an nihil constituam.
+
+ Semper molestie petentium in cum, sanctus laboramus pri at. Vidit ipsum reprimique mei ut, cu est prompta eruditi nominati. Delicata pertinacia cu his, mea magna populo graeco eu. Ex mel alii euripidis consequuntur, vel augue altera et, vis ne dicit vidisse. Dicat choro partiendo usu ne. Aliquip tamquam mei ne, euripidis disputando eam ex. Percipit omittantur contentiones per eu.
+
+ At vim novum eruditi. At vim wisi percipitur, vel iracundia disputando conclusionemque eu. Ex usu vidisse hendrerit, graeci aliquando eam no. Id nemore oblique vis, at sea erat principes disputationi, officiis vituperata eos cu.
+
+ Noster neglegentur an his, mei nullam utroque laoreet ea. Eos stet vide gloriatur no. Usu ut vidit legimus, et affert noster gloriatur duo. Ad cum congue recusabo. Nec dicant fuisset delicata no, ei tritani antiopam scriptorem pro. Eirmod verear ne vel, eu mei quaeque laoreet oporteat.
+
+ Per eu nibh luptatum scripserit. Mei oportere consulatu ne. Nulla alienum cum ea. Mea dico facilisi tacimates ea, ei sea vocent signiferumque, zril albucius tractatos mea id. Te illum novum electram sit. Vim sumo lobortis cu, eu quaestio imperdiet definitiones vim.
+
+ Has fierent expetendis at. Scripta copiosae appellantur sit te, iisque oportere eu nec. Fuisset invidunt phaedrum pri in. Ad dico purto posse est. Aeque prompta ea vim. An his novum honestatis omittantur, insolens forensibus adolescens duo et. Ad qui persius reformidans.
+
+ Pro eu odio tamquam theophrastus, nam ne tota minimum cotidieque. Vel ad congue verterem definiebas. Ne usu dicta utamur virtute, omnis eligendi nominati eos ex. Sonet volumus efficiantur id pro.
+
+ At mandamus ocurreret mea, an mei ipsum euripidis. Eam an veniam pertinacia disputationi, vix an debitis similique delicatissimi. Te labore invidunt salutandi has, quo an brute simul putant. Cu solet altera torquatos vix, purto altera graeco vis an. Alia homero fierent pro ad, ne nam assum populo.
+
+ Ea his posse harum, nec atqui verterem facilisis ut. Ea quaeque moderatius ius. Cum ex vitae integre conceptam. Sed alii convenire cu, wisi referrentur ex nec.
+
+ Everti virtute electram mei ei, eu sit libris saperet. An his veniam audiam, legere persecuti ut per, id accumsan similique qui. Ne choro delectus comprehensam eum, laudem scripta has ei. Ne vim libris alterum, an illud munere reformidans sed. Meis numquam prodesset in eum, nulla audire mei ei. Mea ex legendos atomorum constituto, has nemore tamquam id. Ex ceteros definitionem cum.
+
+ Ne quot justo sed. In sit scripta praesent, at aperiam sadipscing cum. Ne est quot volutpat, est apeirian mandamus in, et movet elitr mediocrem duo. Placerat assentior referrentur nec te, altera cetero fastidii qui at, in vim dolor blandit deserunt. Ei ius nemore partiendo principes.
+
+ Qui assum suscipiantur ei, mei fastidii salutandi posidonium ei. Mel ne vivendo periculis, fabulas impedit habemus ad cum, sed audiam admodum eu. Eius ubique omittantur sed ut, ei vel explicari voluptaria efficiendi. Mundi eligendi nam eu, qui novum dolor blandit cu. Vide semper facete usu ut, ut usu vidit forensibus. Ea cum dignissim definitiones, ea vis torquatos cotidieque, ad pro veri verear.
+
+ No per postea noster referrentur, ea tollit mollis mei. Delicata inimicus suscipiantur quo te, eos et wisi lorem, te inimicus neglegentur contentiones his. Ut choro homero sea. Partiendo definitiones sea te. No vel probo mandamus, id atqui iusto comprehensam quo, eam an deserunt mnesarchum.
+
+ Verterem suavitate definitionem qui te, ad mel augue sanctus eleifend, id eum tale propriae phaedrum. Labore melius latine vix eu, mea labore possim petentium te. Ea quo facer viderer consectetuer, nominavi accusamus qui at. No munere epicuri sea, nam impedit commune senserit ad. Vim in fastidii singulis, elit inani feugait nec in, possim delicata sed at.
+
+ Ut nec partem delicatissimi, dolore tibique adipiscing sed te. Qui meis prompta elaboraret ei, eu velit patrioque reformidans usu. Aliquip deserunt ei usu, sed ea mollis fierent. Diceret argumentum quo cu. In nam dicit fabellas, sed amet antiopam splendide ne. Nec reque nostro rationibus eu.
+
+ Vis solum incorrupte cu, eruditi epicuri accusamus qui ei. Ne sed tation nominavi. Usu ne convenire aliquando ullamcorper. Veniam facilisis omittantur pri in, eum clita fabulas no. An stet facilisi nam.
+
+ Deleniti euripidis omittantur vis ad, quo ei idque labore moderatius. Nec inani interpretaris ex, id vis sumo mazim. An eum dicta denique, sed ferri idque te. Cu nusquam repudiandae ius. Mei id molestie necessitatibus.
+
+ Minimum pertinacia eum ea. Eos an purto melius. Ea congue epicurei laboramus vix, doming accumsan percipit vim at. Modo labitur bonorum ex vis, ex nostrud saperet est.
+
+ Sale malis iisque nam id, ius cetero fierent ut. An timeam perpetua vulputate his, duo aperiri suscipit consetetur ea, ponderum mnesarchum nec at. Ut vis commodo probatus deseruisse, dicunt impedit per te. Brute quaestio usu eu. Solum consul eruditi ei eum, no eos dicant appareat vituperata.
+
+ Dicant utinam mnesarchum cum eu, solet adipisci efficiantur est ei. His cibo summo putent ex, at has placerat mnesarchum, hinc tollit equidem eam ad. Id scriptorem contentiones his, ius no malorum explicari philosophia. Ut case viris recusabo ius, sea vidisse eligendi ea, mel habeo commune et. Pri dolorum docendi fabellas et, numquam contentiones eu mel. Ei eos lobortis intellegat, at corpora scriptorem sea. Eos docendi electram at.
+                </div>
+		<div class="line line_box" id="testText" style="display:none;">I
+scarcely know where to begin, though I sometimes facetiously place the cause of it all to Charley
+Furuseth's credit. He kept a summer cottage in Mill Valley, under the shadow of Mount Tamalpais, and never
+occupied it except when he loafed through the winter mouths and read Nietzsche and Schopenhauer to rest
+his brain. When summer came on, he elected to sweat out a hot and dusty existence in the city and to toil
+incessantly. Had it not been my custom to run up to see him every Saturday afternoon and to stop over till
+Monday morning, this particular January Monday morning would not have found me afloat on San Francisco Bay.
+Not but that I was afloat in a safe craft, for the Martinez was a new ferry-steamer, making her fourth or
+fifth trip on the run between Sausalito and San Francisco. The danger lay in the heavy fog which blanketed
+the bay, and of which, as a landsman, I had little apprehension. In fact, I remember the placid exaltation
+with which I took up my position on the forward upper deck, directly beneath the pilot - house, and allowed
+the mystery of the fog to lay hold of my imagination. A fresh breeze was blowing, and for a time I was
+alone in the moist obscurity - yet not alone, for I was dimly conscious of the presence of the pilot, and of
+what I took to be the captain, in the glass house above my head. I remember thinking how comfortable it
+was, this division of labour which made it unnecessary for me to study fogs, winds, tides, and navigation,
+in order to visit my friend who lived across an arm of the sea. It was good that men should be specialists,
+I mused. The peculiar knowledge of the pilot and captain sufficed for many thousands of people who knew no
+more of the sea and navigation than I knew. On the other hand, instead of having to devote my energy to
+the learning of a multitude of things, I concentrated it upon a few particular things, such as, for
+instance, the analysis of Poe's place in American literature - an essay of mine, by the way, in the current
+Atlantic. Coming aboard, as I passed through the cabin, I had noticed with greedy eyes a stout gentleman
+reading the Atlantic, which was open at my very essay. And there it was again, the division of labour,
+the special knowledge of the pilot and captain which permitted the stout gentleman to read my special
+knowledge on Poe while they carried him safely from Sausalito to San Francisco. A red - faced man, slamming
+the cabin door behind him and stumping out on the deck, interrupted my reflections, though I made a mental
+note of the topic for use in a projected essay which I had thought of calling "The Necessity for Freedom:
+A Plea for the Artist." The red - faced man shot a glance up at the pilot - house, gazed around at the fog,
+stumped across the deck and back (he evidently had artificial legs), and stood still by my side, legs
+wide apart, and with an expression of keen enjoyment on his face. I was not wrong when I decided that
+his days had been spent on the sea. "It's nasty weather like this here that turns heads grey before their
+time," he said, with a nod toward the pilot - house. "I had not thought there was any particular strain,"
+I answered. "It seems as simple as A, B, C. They know the direction by compass, the distance, and the
+speed. I should not call it anything more than mathematical certainty." "Strain!" he snorted. "Simple
+as A, B, C! Mathematical certainty!" He seemed to brace himself up and lean backward against the air as
+he stared at me. "How about this here tide that's rushin' out through the Golden Gate?" he demanded, or
+bellowed, rather. "How fast is she ebbin'? What's the drift, eh? Listen to that, will you? A bell-buoy,
+and we're a - top of it! See 'em alterin' the course!" From out of the fog came the mournful tolling of a
+bell, and I could see the pilot turning the wheel with great rapidity. The bell, which had seemed straight
+ahead, was now sounding from the side. Our own whistle was blowing hoarsely, and from time to time the
+sound of other whistles came to us from out of the fog. "That's a ferry - boat of some sort," the new-comer
+said, indicating a whistle off to the right. "And there! D'ye hear that? Blown by mouth." Some scow
+                </div>
+                <ul class="tworight">
+                    <li>2</li>
+                    <li>4</li>
+                    <li>6</li>
+                    <li>8</li>
+                    <li>10</li>
+                    <li>12</li>
+                    <li>14</li>
+                    <li>16</li>
+                    <li>18</li>
+                    <li>20</li>
+                    <li>22</li>
+                    <li>24</li>
+                    <li>26</li>
+                    <li>28</li>
+                    <li>30</li>
+                    <li>32</li>
+                    <li>34</li>
+                    <li>36</li>
+                    <li>38</li>
+                    <li>40</li>
+                    <li>42</li>
+                </ul>
+            </div>
+	</div>
+        <div class="gcbtn">
+            <input type="button" id="doneBtn" value="Done" class="btn btn-success">
+        </div>
+    </div>
+</div>
+

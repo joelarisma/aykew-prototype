@@ -1,5 +1,7 @@
 @extends('layouts.exercises')
-
+<?php
+    $url = '';
+?>
 @section('content')
 <div id="instructions" class="modal" data-backdrop="static" data-keyboard="false" id="speed" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
     <div class="modal-dialog">
@@ -38,13 +40,7 @@
             <span id="wpm" style="color: #ffffff"></span>
         </div>
         <div class="round_img_container">
-        @foreach ($exercise_order as $no)
-            @if ($current_exercise->id < $no->id)
-            <span id='round_{{$no->id}}' class='round_remaining'></span>
-            @else
-            <span id='round_{{$no->id}}' class='round_completed'></span>
-            @endif
-        @endforeach
+       
         </div>
     </div>
     <div id="loading" style="display:none;">
@@ -52,16 +48,16 @@
     </div>
 </footer>
 
-<form action="/{{ $url }}/session" method="POST" id="exerciseform">
-    <input type="hidden" name="session_id" value="{{ $session_id }}">
-    <input type="hidden" name="step" value="{{ $current_step }}">
-    <input type="hidden" name="score" value="exercise">
+<form action="{{ url('session', $session_level) }}" method="POST" id="exerciseform">
+    <input type="hidden" name="session_exercise_id" value="{{ $session_exercise->id }}">
+    <input type="hidden" name="session_exercise_type_id" value="{{ $session_exercise->type->id }}">
+    <input type="hidden" name="exercise_id" value="{{ $session_exercise->exercise_id }}">
     <input type="hidden" name="time_spend" value="{{ \Carbon\Carbon::now() }}">
 </form>
 
-<script src="/js/howler.min.js"></script>
-<script src="/js/exercise.js"></script>
-<script src="/js/splittext.js"></script>
+<script src="{{ URL::asset('js/howler.min.js') }}"></script>
+<script src="{{ URL::asset('js/exercise.js') }}"></script>
+<script src="{{ URL::asset('js/splittext.js') }}"></script>
 <script>
     var ex = {{ $ex }};
     //  {"id":24,

@@ -4,19 +4,20 @@
 <div style="clear: both;"></div>
 <section>
 <div class="center_div">
-    <form action="/{{ $url }}/session" name="questionFrm" id="questionFrm" method="POST">
-        <input type="hidden" name="session_id" value="{{ $session_id }}">
-        <input type="hidden" name="step" value="{{ $current_step }}">
-        <input type="hidden" name="test_id" value="{{ $posttest_id }}">
-        <input type="hidden" name="score" value="{{ $wpm }}" id="form_score">
-        <input type="hidden" name="pct" value="" id="form_pct">
-        <input type="hidden" name="ers" value="" id="form_ers">
-        <input type="hidden" name="testid" id="testid" value="{{ $posttest_id }}">
-        <input type="hidden" name="wpm" id="wpm" value="{{ $wpm }}">
-        <input type="hidden" name="time_spend" value="{{ \Carbon\Carbon::now() }}">
+ 
+ <form action="{{ url('session', $session_level) }}" name="questionFrm" id="questionFrm" method="POST">
+
+    <input type="hidden" name="exercise_id" value="{{ $test_id }}">
+    <input type="hidden" name="wpm" value="{{ $wpm }}">
+    <input type="hidden" name="session_exercise_id" value="{{ $session_exercise->id }}">
+    <input type="hidden" name="session_exercise_type_id" value="{{ $session_exercise->type->id }}">
+    <input type="hidden" name="score">
+    <input type="hidden" name="is_questions" value="1">
+    <input type="hidden" name="time_spend" value="{{ \Carbon\Carbon::now() }}">
+
 <?php
 $i = 1;
-if (is_array($questionData))
+if ($questionData->count() > 0)
 {
     foreach ( $questionData as $data )
     {
@@ -161,7 +162,7 @@ function urlScore()
     var score = 0;
     var ers = 0;
     var percent = 0;
-    var count = <?php echo count($questionData); ?>;
+    var count = <?php echo $questionData->count(); ?>;
     var wpm = <?php echo $wpm; ?>;
 
     for(i = 1; i <= count; i++) {
@@ -171,11 +172,18 @@ function urlScore()
     }
     
     if(score >= 1 && count >= 1) {
-        percent = (score * 100 / count);
-        ers = Math.round(wpm * percent / 100);
+        //percent = (score * 100 / count);
+        //ers = Math.round(wpm * percent / 100);
+        percent = (score / count);
+        ers = Math.round(wpm * percent);
     }
 
+    //actual calculation should be sent to backend
+    $('input[name="score"]').val(score);
+
     $("#overlay").show();
+
+    //to show only
     $("#ers").html(ers);
     $("#form_pct").val(percent);
     $("#form_ers").val(ers);

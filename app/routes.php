@@ -20,6 +20,10 @@ Route::get('/eye-speed', function() {
 	return View::make('dynamic.eyespeedtest');
 });
 
+Route::post('/course/exercise-text', ['uses' => 'ContentController@exerciseText']);
+Route::post('/course/exercise-images', ['uses' => 'ContentController@exerciseImages']);
+Route::post('/course/exercise-image-list', ['uses' => 'ContentController@exerciseImageList']);
+
 Route::get('/session/new', function() {
 	$handler = new UserSessionHandler;
 

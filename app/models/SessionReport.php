@@ -24,4 +24,9 @@ class SessionReport extends Eloquent {
 	{
 		return $this->belongsTo('CourseSession', 'session_id');
 	}
+
+	public function type()
+	{
+		return $this->belongsTo('SessionExerciseType', 'session_exercise_type_id');
+	}
 }
