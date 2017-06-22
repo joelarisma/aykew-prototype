@@ -16,6 +16,14 @@
  * 
  */
 
+/**
+* notes: 
+* - create a hasQuestions function return bool true | false for post-test lvl 21 and comprehension test
+* - need to clarify eye exercises speed calculations
+* - need to clarify more detailed requirements, user has certain limit to take the exercises per day except super admin
+* - 
+**/
+
 class UserSessionHandler {
 
 	//user who took the activity
@@ -202,8 +210,8 @@ class UserSessionHandler {
 		$level_id = $this->session ? $this->session->session_level_id : 1;
 
 		return CourseSession::where('course_id', $course_id)
-					->where('session_level_id', $level_id)
-					->orderBy('session')
+					//->where('session_level_id', $level_id)
+					->orderBy('session', 'ASC')
 					->get();
 	}
 

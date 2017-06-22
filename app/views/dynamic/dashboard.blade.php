@@ -1,7 +1,7 @@
 @extends('layouts.home')
 
 @section('content')
-	@include('flash::message')
+	
 	<div id="page-wrapper">
 	    <div class="row" style="padding-top:15px;">
     	        <div class="col-md-8">
@@ -9,7 +9,7 @@
                         <div class="panel-body text-center">
 			    @if ($section)
 			    <div class="row text-left">
-			        <div class="col-sm-2"><img src="/uploads/section_image/{{ $section->image }}" style="width:100%;"/></div>
+			        <!--<div class="col-sm-2"><img src="/uploads/section_image/{{ $section->image }}" style="width:100%;"/></div>-->
                 		<div class="col-sm-8"><h3>{{ $section->name }}</h3><em>{{ $section->short_desc }}</em></div>
                 		<div class="col-sm-2"><button type="button" class="btn btn-success btn-block" disabled="">LEVEL {{ $section->level_number() }}</button></div>
                		    </div>
@@ -109,7 +109,7 @@
 					</div>
 							@endif
 					<div class='panel-footer'>
-						<a class='btn btn-warning btn-lg btn-block' href='/{{ $package->url }}/session'>&gt;&gt; Begin Today's <!--'--> Training &lt;&lt;</a>
+						<a class='btn btn-warning btn-lg btn-block' href="{{ url('session', $session->session) }}">&gt;&gt; Begin Today's <!--'--> Training &lt;&lt;</a>
 					</div>
 						@endif
 
@@ -233,7 +233,7 @@
     </div>
 	<div class="modal fade" id="reminderModal" >
 		<div class="modal-dialog">
-			<form method="post" action="{{route('reminder.store')}}" class="form-horizontal" id="addForm">
+			<form method="post" action="" class="form-horizontal" id="addForm">
 				<div class="modal-content">
 					<div class="modal-header">
 						<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
@@ -304,29 +304,7 @@
 							</div>
 						</div>
 
-						<div class="form-group">
-							<label class="col-sm-3 control-label"></label>
-							<div class="col-sm-8">
-								<div title="Add to Calendar" class="addeventatc">
-									Add to Calendar
-									<span class="start">10/21/2016 09:00 AM</span>
-									<span class="end">10/21/2016 11:00 AM</span>
-									<span class="timezone">{{ \Illuminate\Support\Facades\Auth::user()->userTZ() }}</span>
-									<span class="title">Summary of the event</span>
-									<span class="description">Description of the event<br>Example of a new line</span>
-									<span class="location">Location of the event</span>
-									<span class="organizer">{{ \Illuminate\Support\Facades\Auth::user()->name }}</span>
-									<span class="organizer_email">{{ \Illuminate\Support\Facades\Auth::user()->email }}</span>
-									<span class="facebook_event">https://www.facebook.com/events/703782616363133</span>
-									<span class="date_format">MM/DD/YYYY</span>
-									<span class="recurring">FREQ=DAILY;COUNT=10</span>
-									<span class="status">confirmed</span>
-									<span class="client">aTtNefDsuzzxqhBmgmnd21881</span>
-									{{--<span class="reminders"></span>--}}
-								</div>
-							</div>
-						</div>
-
+						
 						{{--<hr>--}}
 						{{--<div class="modal-footer">--}}
 							{{--<button type="button" data-dismiss="modal" class="btn" id="cancel">Cancel</button>--}}
@@ -362,178 +340,7 @@
     <!--modal end for showing error for next session -->
 @endif
 
-    <div class="col-md-4">
-
-
-    @if ($unlocks['u_reporting'])
-
-        <div class="panel panel-default">
-            <div class="panel-heading text-center">
-                Reading Speed Snapshot
-            </div>
-            <div class="panel-body">
-                <!-- Beginning Speed -->
-                <div class="row">
-                    <div class="col-xs-8 text-left">
-                        <p style="vertical-align:middle;line-height: 35px;">Initial Speed</p>
-                    </div>
-                    <div class="col-xs-4 text-right">
-                        <span class="btn btn-outline btn-info pull-right" style="cursor:default;">
-                        <strong>{{ $speeds['initial_wpm'] }} WPM</strong></span>
-                    </div>
-                </div>
-                <!-- Current Speed -->
-                <div class="row">
-                    <div class="col-xs-8 text-left">
-                        <p style="vertical-align:middle;line-height: 35px;">Current Speed (Avg)<sup>1</sup></p>
-                    </div>
-                    <div class="col-xs-4 text-right">
-                        <span class="btn btn-outline btn-success pull-right" style="cursor:default;">
-                        <strong>{{ $speeds['average_wpm'] }} WPM</strong></span>
-                    </div>
-                </div>
-                <small><em><sup>1</sup>Average of last 5 post-training speed tests.</em></small>
-            </div>
-
-            @if ($speeds['initial_ers'])
-                <div class="panel-heading text-center">
-                    Comprehension Snapshot
-                </div>
-                <div class="panel-body">
-                    <!-- Beginning Speed -->
-                    <div class="row">
-                        <div class="col-xs-8 text-left">
-                            <p style="vertical-align:middle;line-height: 35px;">Initial ERS</p>
-                        </div>
-                        <div class="col-xs-4 text-right">
-                            <span class="btn btn-outline btn-info pull-right" style="cursor:default;">
-                            <strong>{{ $speeds['initial_ers'] }} WPM</strong></span>
-                        </div>
-                    </div>
-                    <!-- Current Speed -->
-                    <div class="row">
-                        <div class="col-xs-8 text-left">
-                            <p style="vertical-align:middle;line-height: 35px;">Current ERS (Avg)<sup>2</sup></p>
-                        </div>
-                        <div class="col-xs-4 text-right">
-                            <span class="btn btn-outline btn-success pull-right" style="cursor:default;">
-                            <strong>{{ $speeds['average_ers'] }} WPM</strong></span>
-                        </div>
-                    </div>
-                    <small><em><sup>2</sup>Average of last 3 comprehension tests.</em></small>
-                </div>
-            @endif
-
-            @if ($speeds['initial_typing'])
-                <div class="panel-heading text-center">
-                    Typing Speed Snapshot
-                </div>
-                <div class="panel-body">
-                    <!-- Beginning Speed -->
-                    <div class="row">
-                        <div class="col-xs-8 text-left">
-                            <p style="vertical-align:middle;line-height: 35px;">Initial Speed</p>
-                        </div>
-                        <div class="col-xs-4 text-right">
-                            <span class="btn btn-outline btn-info pull-right" style="cursor:default;">
-                            <strong>{{ $speeds['initial_typing'] }} Net WPM</strong></span>
-                        </div>
-                    </div>
-                    <!-- Current Speed -->
-                    <div class="row">
-                        <div class="col-xs-8 text-left">
-                            <p style="vertical-align:middle;line-height: 35px;">Current Speed (Avg)<sup>3</sup></p>
-                        </div>
-                        <div class="col-xs-4 text-right">
-                            <span class="btn btn-outline btn-success pull-right" style="cursor:default;">
-                            <strong>{{ $speeds['average_typing'] }} Net WPM</strong></span>
-                        </div>
-                    </div>
-                    <small><em><sup>3</sup>Average of last 3 typing speed tests.</em></small>
-                </div>
-            @endif
-
-            <div class="panel-footer">
-                <a href="/{{ $package->url }}/reports" class="btn btn-link btn-block">View Progress Details</a>
-            </div>
-        </div>
-
-	<?php
-	/* Achievement Panel
-	for ($i=0; $i<3; $i++)
-		$image[$i] = '';
-	$i = 0;
-	foreach ($this->badges as $badge) {
-		$imageurl = $badge['image'];
-		$image[$i] = "<img src='/images/badges/$imageurl' style='width:90%'/>";
-		$i++;
-		echo '
-					<div class="panel panel-default">
-                        <div class="panel-heading text-center">
-                            Recent Achievements
-                        </div>
-                        <div class="panel-body text-center">
-                            <!--We show 3 at the most-->
-                            <div class="row">
-
-                                <div class="col-xs-4 text-center">'. $image[0] .'</div>
-                                <div class="col-xs-4 text-center">'. $image[1] .'</div>
-                                <div class="col-xs-4 text-center">'. $image[2] .'</div>
-                            </div>
-                        </div>
-                        <!-- /.panel-body -->
-                        <div class="panel-footer">
-                            <a href="/eyeq/reports/achievements" class="btn btn-link btn-block">See All Achievements</a>
-
-                        </div>
-                    </div>';
-    }
-	*/
-    ?>
-@endif
-                    <div class="panel panel-default">
-                        <div class="panel-heading text-center">
-                            Latest from the eyeQ Blog
-                        </div>
-                        <!-- /.panel-heading -->
-                        <div class="panel-body">
-							<script src="/js/feedget-1.1.2.min.js"></script>
-							<script>
-								$(function() {
-									$('#rssblog').feedget(
-										{
-											feed: 'http://infinitemind.io/mind-resources/feed/',
-						                    direction: 'vertical',
-						                    entries: 1,
-						                    images: true,
-						                    buttons: true,
-						                    facebook: false,
-						                    reverse: false
-										});
-								});
-							</script>
-
-							<div id="rssblog" style="width:100%;float:left;"></div>
-
-
-
-                           <div class="text-center">
-                                <a href="https://twitter.com/eyeQsuccess" target="_blank"><button type="button" class="btn btn-info btn-circle"><i class="fa fa-twitter"></i></button></a>
-                                <a href="https://www.facebook.com/eyeQbyInfiniteMind" target="_blank"><button type="button" class="btn btn-primary btn-circle"><i class="fa fa-facebook"></i></button></a>
-                                <a href="https://plus.google.com/+Eyeqadvantage/posts" target="_blank"><button type="button" class="btn btn-danger btn-circle"><i class="fa fa-google-plus"></i></button></a>
-
-                                <!-- Move the discount link to billing page
-                                <br><br>
-                                Give friends &amp; family 50% off!<br>
-                                <a href="https://eyeqadvantage.com/join/family-discount" target="_blank" class="btn btn-success">Get the Family Discount >></a>
-                                -->
-                            </div>
-                        </div>
-                        <!-- /.panel-body -->
-                </div>
-                <!-- /.col-lg-4 -->
-        </div>
-            <!-- /.row -->
+    
     </div>
 </div>
 <link href="//cdn.rawgit.com/Eonasdan/bootstrap-datetimepicker/e8bddc60e73c1ec2475f827be36e1957af72e2ea/build/css/bootstrap-datetimepicker.css" rel="stylesheet">

@@ -3,11 +3,11 @@
 @section('content')
 <table>
 	<tbody>
-		@foreach($sessions as $i => $session)
+		@foreach($sessions as $session)
 		<tr>
 			<th>
 				Session {{ $session->session }} 
-				@if($current_session->session == $i)
+				@if($current_session->session == $session->session)
 					<span>check</span>
 				@endif
 			</th>

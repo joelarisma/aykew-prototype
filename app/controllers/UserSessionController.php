@@ -20,6 +20,37 @@ class UserSessionController extends BaseController {
 		return View::make('hello');
 	}
 
+	public function sessionDashboard()
+	{
+		$handler = new UserSessionHandler;
+
+		$vars = $handler->newSession();
+
+		 $level = $section = $this->getLevelForSession($vars['current_session']);
+
+		if(is_numeric($vars))
+			return Redirect::to('/session/' . $vars);
+
+		return View::make('dynamic.dashboard', [
+					'package' 	=> null,
+		            'session' 	=> $vars['current_session'],
+		            'section' 	=> $section,
+		            'level' 	=> $level,
+		            'unlocks' 	=> [],
+		            'speeds' 	=> [],
+		            'day' 		=> true,
+		            'tip' 		=> "",
+		            'todo'		=> true, //proceed
+		            'do_comptest' 	=> false,
+		            'do_typetest' 	=> false,
+		            'do_twopoint' 	=> false,
+		            'do_session' 	=> true,
+		            'nextsection' 	=> null,
+		            'video' 		=> false,
+		            'show_lti_modal' => null
+			]);
+	}
+
 	public function session($session_level) 
 	{
 		$handler = new UserSessionHandler;
@@ -96,4 +127,29 @@ class UserSessionController extends BaseController {
 
 		return View::make($view, $args);
 	}
+
+	/**
+     * Get level for a given session
+     *
+     * @param object $session CourseSession object
+     *
+     * @return Section object
+     */
+    public function getLevelForSession($session)
+    {
+        $package_levels = Section::where('course_id', '=', $session->course_id)
+            ->where('status', '=', 1)
+            ->get();
+
+        foreach ($package_levels as $level) {
+            $begining_session = $level->begSessions->session;
+            $ending_session = $level->endSessions->session;
+
+            if ($begining_session <= $session->session && $ending_session >= $session->session) {
+                return $level;
+            }
+        }
+
+        return null;
+    }
 }

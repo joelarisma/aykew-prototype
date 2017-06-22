@@ -24,17 +24,7 @@ Route::post('/course/exercise-text', ['uses' => 'ContentController@exerciseText'
 Route::post('/course/exercise-images', ['uses' => 'ContentController@exerciseImages']);
 Route::post('/course/exercise-image-list', ['uses' => 'ContentController@exerciseImageList']);
 
-Route::get('/session/new', function() {
-	$handler = new UserSessionHandler;
-
-	$vars = $handler->newSession();
-
-	if(is_numeric($vars))
-		return Redirect::to('/session/' . $vars);
-
-	return View::make('dynamic.index')
-				->with($vars);
-});
+Route::get('/session/new', 'UserSessionController@sessionDashboard');
 
 Route::post('/session/{session_level}', 'UserSessionController@session');
 Route::get('/session/{session_level}', 'UserSessionController@session');
