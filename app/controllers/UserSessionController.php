@@ -20,6 +20,19 @@ class UserSessionController extends BaseController {
 		return View::make('hello');
 	}
 
+	public function sessionReport($type, $no)
+	{
+		$handler = new UserSessionHandler;
+
+		$vars = $handler->generateReport($type, $no);
+
+		return View::make('dynamic.reports', [
+				'reports'	=> $vars,
+				'type'		=> $type,
+				'no'		=> $no
+			]);
+	}
+
 	public function sessionDashboard()
 	{
 		$handler = new UserSessionHandler;
@@ -70,19 +83,47 @@ class UserSessionController extends BaseController {
 		{
 			case 'pre-test':
 			case 'post-test':
-				$vars = $handler->getReadingExercise($exercise);
-				$view = 'dynamic.readingspeedtest';
-				$args = [
-							'test' 				=> $vars,
-							'session_exercise' 	=> $exercise,
-							'session_level' 	=> $session_level
-						];
+				if($exercise->type->type_code == 'pre-test') 
+				{
+					$vars = $handler->getReadingExercise($exercise);
+					$view = 'dynamic.readingspeedtest';
+					$args = [
+								'test' 				=> $vars,
+								'session_exercise' 	=> $exercise,
+								'session_level' 	=> $session_level,
+								'is_last'			=> $handler->isLast()
+							];
+				} else {
+					if($vars = $handler->doComprehensionQuestions($exercise)) 
+					{
+
+						$view = 'dynamic.comprehensionquestiontest';
+						$args = [
+									'questionData'		=> $vars['questions'],
+									'wpm' 				=> $vars['wpm'],
+									'session_exercise'	=> $exercise,
+									'test_id'			=> $vars['test_id'],
+									'session_level' 	=> $session_level,
+									'is_last'			=> $handler->isLast()
+								];
+					} else {
+						$vars = $handler->getReadingExercise($exercise);
+						$view = 'dynamic.readingspeedtest';
+						$args = [
+									'test' 				=> $vars,
+									'session_exercise' 	=> $exercise,
+									'session_level' 	=> $session_level,
+									'is_last'			=> $handler->isLast()
+								];
+					} 
+				}
 			break;
 			case 'eye-speed':
 				$view = 'dynamic.eyespeedtest';
 				$args = [
 							'session_exercise'	=> $exercise,
-							'session_level' 	=> $session_level
+							'session_level' 	=> $session_level,
+							'is_last'			=> $handler->isLast()
 						];
 			break;
 			case 'comprehension':
@@ -96,7 +137,8 @@ class UserSessionController extends BaseController {
 								'wpm' 				=> $vars['wpm'],
 								'session_exercise'	=> $exercise,
 								'test_id'			=> $vars['test_id'],
-								'session_level' 	=> $session_level
+								'session_level' 	=> $session_level,
+								'is_last'			=> $handler->isLast()
 							];
 				} else {
 
@@ -105,7 +147,8 @@ class UserSessionController extends BaseController {
 					$args = [
 								'test'				=> $vars,
 								'session_exercise'	=> $exercise,
-								'session_level'		=> $session_level
+								'session_level'		=> $session_level,
+								'is_last'			=> $handler->isLast()
 							];
 				}
 			break;
@@ -120,13 +163,30 @@ class UserSessionController extends BaseController {
 			                'superfast_wpm' => $vars['wpmspeeds']['superfast_wpm'],
 			                'words'			=> $vars['wpmspeeds']['words'],
 			                'session_exercise'	=> $exercise,
-							'session_level'		=> $session_level
+							'session_level'		=> $session_level,
+							'is_last'			=> $handler->isLast()
 						];
 			break;
+			case 'typing-test':
+				$vars = $handler->getReadingExercise($exercise);
+				$vars->description = strip_tags(html_entity_decode($vars->description));
+				$vars->content = strip_tags(html_entity_decode($vars->content));
+
+				$view = 'dynamic.typingtest';
+				$args = [
+							'test' 				=> $vars,
+							'session_exercise' 	=> $exercise,
+							'session_level' 	=> $session_level,
+							'last_test'			=> $handler->isLast()
+						];
+			break;
+			default:
 		}
 
 		return View::make($view, $args);
 	}
+
+
 
 	/**
      * Get level for a given session

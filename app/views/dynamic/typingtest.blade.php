@@ -6,6 +6,7 @@
     color: rgba(0, 0, 0, 0);
     text-shadow: 0 0 10px #333;
 }
+
 </style>
 <div id="page-wrapper">
     <div class="row" style="padding-top:15px;">
@@ -93,13 +94,15 @@
     </div>
 </div>
 
-<form action="/{{ $url }}/session" method="POST" id="testform">
-    <input type="hidden" name="session_id" value="{{ $session_id }}">
-    <input type="hidden" name="step" value="{{ $current_step }}">
-    <input type="hidden" name="test_id" value="{{ $test->id }}">
-    <input type="hidden" name="score" value="" id="form_score">
+<form action="{{ url('session', $session_level) }}" method="POST" id="testform">
+    <input type="hidden" name="exercise_id" value="{{ $test->id }}">
+    <input type="hidden" name="session_exercise_id" value="{{ $session_exercise->id }}">
+    <input type="hidden" name="session_exercise_type_id" value="{{ $session_exercise->type->id }}">
+    <input type="hidden" name="wordcount" id="wordcount" value="">
+    <input type="hidden" name="seconds" value="" id="seconds">
+    <input type="hidden" name="wpm" value="" id="form_score">
     <input type="hidden" name="net" value="" id="form_net">
-    <input type="hidden" name="pct" value="" id="form_pct">
+    <input type="hidden" name="percentage" value="" id="form_pct">
     <input type="hidden" name="time_spend" value="{{ \Carbon\Carbon::now() }}">
 </form>
 
@@ -114,7 +117,8 @@ var testId = {{ $test->id }};
 var wpmType;
 var netType;
 var pctType;
-
+var seconds;
+var timeSpentTimer;
 // General function to trim a string to length n
 function Left(str, n){
     if (n <= 0)
@@ -143,6 +147,9 @@ $(function(){
     $("#saveScore").click(function() {
         $('#saveScore').html('Saving test results...');
 
+    $('#seconds').val(seconds/10);
+    $('#wordcount').val(wordCnt);
+    
 	$("#form_score").val(wpmType);
 	$("#form_net").val(netType);
 	$("#form_pct").val(pctType/10);
@@ -165,17 +172,21 @@ function beginTest()
     startType = day.getTime();
 
     //Count the number of valid words in the testing baseline string
-    wordCnt = document.JobOp.given.value.split(" ").length;
+    wordCnt = {{ str_word_count(trim(str_replace('  ', ' ', strip_tags($test->description)))) }};
+    //document.JobOp.given.value.split(" ").length;
 
     document.JobOp.typed.value = "";
     document.JobOp.typed.focus();
     document.JobOp.typed.select();
+
+
     calcStat();
 }
 
 function endTest()
 {
     clearTimeout(timerObj);
+    clearInterval(timeSpentTimer);
     eDay = new Date();
     endType = eDay.getTime();
     totalTime = ((endType - startType) / 1000)
@@ -260,6 +271,9 @@ function calcStat()
         // remove double spaces
         var thisTyped = document.JobOp.typed.value.replace(/  /g, " ");
 
+
+        seconds++;
+
         eDay = new Date();
         endType = eDay.getTime();
         totalTime = ((endType - startType) / 1000);
@@ -301,6 +315,7 @@ function calcStat()
     }
     // ignore any errors
     catch(e){
+
     };
 }
 </script>

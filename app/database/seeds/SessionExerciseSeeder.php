@@ -39,7 +39,7 @@ class SessionExerciseSeeder extends Seeder {
 
 				if($exercise->product_value == 'Reading' && $i == 0)
 				{
-					$type = $this->mapTypes['Pre-Test'];
+					$type = ($session->session == 0) ? $this->mapTypes['Post-Test'] : $this->mapTypes['Pre-Test'];
 					$type = $this->getExerciseType($type);
 					$referenceTable = 'posttest';
 				

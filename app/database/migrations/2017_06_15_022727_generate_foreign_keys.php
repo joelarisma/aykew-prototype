@@ -45,6 +45,10 @@ class GenerateForeignKeys extends Migration {
 		    $table->foreign('session_exercise_id')
 		      ->references('id')->on('session_exercises')
 		      ->onDelete('cascade');
+
+		    $table->foreign('session_exercise_type_id')
+		      ->references('id')->on('session_exercise_types')
+		      ->onDelete('cascade');
 		});
 	}
 

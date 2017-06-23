@@ -2,7 +2,7 @@
 
 @section('content')
 <?php
-    $last_test = false;
+    $last_test = $is_last;
 ?>
 <div id="page-wrapper">
     <div class="row" style="padding-top:15px;">

@@ -4,10 +4,7 @@
 
 <?php
     $test_type = '';
-    $last_test = '';
-    $session_id = '';
-    $current_step = '';
-    $url = '';
+    $last_test = $is_last;
 ?>
     <div class="center_div">
         <div id="instructions" class="modal fade" data-backdrop="static" data-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
@@ -93,13 +90,6 @@
          </div>
      </div>
 
-    <!-- <form action="/{{ $url }}/session" method="POST" id="testform">
-        <input type="hidden" name="session_id" value="{{ $session_id }}">
-        <input type="hidden" name="step" value="{{ $current_step }}">
-        <input type="hidden" name="score" value="" id="form_score">
-        <input type="hidden" name="time_spend" value="{{ \Carbon\Carbon::now() }}">
-    </form> -->
-
     <form action="{{ url('session', $session_level) }}" method="POST" id="testform">
         <input type="hidden" name="session_exercise_id" value="{{ $session_exercise->id }}">
         <input type="hidden" name="session_exercise_type_id" value="{{ $session_exercise->type->id }}">
@@ -109,6 +99,7 @@
  		    
     <script src="https://netdna.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min.js"></script>
     <script>
+
 var objTimer;
 var seconds;
 var stepSec;

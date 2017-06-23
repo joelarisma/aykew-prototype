@@ -4,7 +4,7 @@ use Illuminate\Database\Eloquent\Model as Eloquent;
 
 class SessionReport extends Eloquent {
 
-	protected $table = 'session_report';
+	protected $table = 'demo_session_report';
 
 	protected $fillable = [
 			'wpm',
@@ -13,6 +13,8 @@ class SessionReport extends Eloquent {
 			'time_spent',
 			'percentage',
 			'eye_power',
+			'seconds',
+			'wordcount',
 			'exercise_id',
 			'user_id',
 			'session_id',

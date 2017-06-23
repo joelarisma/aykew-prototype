@@ -22,7 +22,7 @@
 * - need to clarify eye exercises speed calculations
 * - need to clarify more detailed requirements, user has certain limit to take the exercises per day except super admin
 * - need more information on section - i know at this point we are more concern of the system calculation accuracy
-* - 
+* - reminder: session 0 - first exercise is a post test type
 **/
 
 class UserSessionHandler {
@@ -84,6 +84,8 @@ class UserSessionHandler {
 
 	//set speed to default according to previous implementation
 	private $speed = 400;
+
+	private $is_last_exercise = false;
 
 	public function __construct() 
 	{  
@@ -160,6 +162,11 @@ class UserSessionHandler {
 		}
 
 		return $_types;
+	}
+
+	public function isLast()
+	{
+		 return $this->is_last_exercise;
 	}
 
 	/**
@@ -261,8 +268,7 @@ class UserSessionHandler {
 			if($session->reports->count() == $session->exercises->count()) {
 				
 				//check if exercise type is comprehension and hasn't answered the questions
-				if( $session->reports[0]->type->type_code == 'comprehension' &&
-					($session->reports[0]->ers == 0 || is_null($session->reports[0]->ers)) )
+				if($this->canDoComprehensionTest())	
 					return $this->session_status[3];
 
 				return $this->session_status[1];
@@ -323,6 +329,7 @@ class UserSessionHandler {
 
 		$sequence_no = 0;
 		$exercises = $this->getSessionExercises();
+		$this->is_last_exercise = false;
 		foreach ($exercises as $exercise) 
 		{
 			if(!$session_report)
@@ -333,10 +340,10 @@ class UserSessionHandler {
 			if($exercise->id == $session_report->session_exercise_id) {
 
 				//return to last exercise sequence if test is comprehension type and hasn't filled out the questions
-				if( $session_report->type->type_code == 'comprehension' &&
-					($session_report->ers == 0 || is_null($session_report->ers)) )
-						$sequence_no--;
+				if($this->canDoComprehensionTest())
+					$sequence_no--;
 
+				$this->is_last_exercise = true;
 				break;
 			}
 		}
@@ -384,14 +391,19 @@ class UserSessionHandler {
 		$this->exercise = SessionExercise::find($input['session_exercise_id']);
 
 		if(!$this->exercise)
-			dd('something went wrong');
+			dd('something went wrong -- couldn\'t load session exercise');
 		
 		switch($this->exercise->type->type_code)
 		{
 			case 'pre-test':
 			case 'post-test':
 				$this->test = PostTest::find($input['exercise_id']);
-				$this->user_metrics['wpm'] = $this->getWordsPerMinute($input['wordcount'], $input['seconds']);
+				if( !isset($input['score']) && !isset($input['is_questions']) )
+					$this->user_metrics['wpm'] = $this->getWordsPerMinute($input['wordcount'], $input['seconds']);
+				else {
+					$updates = $this->getComprehensionResults($input['exercise_id'], $input['score'], $input['wpm']);
+					$do_update = true;
+				}
 			break;
 			case 'eye-speed':
 				$this->user_metrics['eye_power'] = $this->getEyeMusclePower($input['seconds']);
@@ -408,13 +420,47 @@ class UserSessionHandler {
 			case 'eye-exercise':
 				$this->test = Exercise::find($input['exercise_id']);
 			break;
+			case 'typing-test':
+				$this->test = PostTest::find($input['exercise_id']);
+				$this->user_metrics['net'] = $input['net'];
+				$this->user_metrics['wpm'] = $input['wpm'];
+				$this->user_metrics['percentage'] = $input['percentage'];
+				$this->user_metrics['percentage'] = $input['percentage'];
+			break;
+			default:
 		}
 
 		if(!$this->test && $this->exercise->type->type_code != 'eye-speed')
-			dd('double check');
-
+			dd('double check -- exercise not found');
+		
 		if(!$do_update)
 			SessionReport::create([
+					'session_exercise_id' 		=> $this->exercise->id,
+					'session_exercise_type_id'	=> $this->exercise->session_exercise_type_id,
+					'user_id'					=> $this->user->id,
+					'session_id'				=> $this->exercise->session_id,
+					'exercise_id'				=> ($this->test) ? $this->test->id : null,
+					'wpm'						=> $this->user_metrics['wpm'],
+					'ers'						=> $this->user_metrics['ers'],
+					'net'						=> $this->user_metrics['net'],
+					'seconds'					=> (isset($input['seconds']) ? $input['seconds'] : null),
+					'wordcount'					=> (isset($input['score']) ? $input['score'] : null),
+					'cscore'					=> (isset($input['score']) ? $input['score'] : null),
+					'time_spent'				=> $this->user_metrics['time_spent'],
+					'percentage'				=> $this->user_metrics['percentage'],
+					'eye_power'					=> $this->user_metrics['eye_power'],
+				]);
+		else
+			SessionReport::where('session_id', $this->exercise->session_id)
+					->where('user_id', $this->user->id)
+					->where('session_exercise_type_id', $this->exercise->session_exercise_type_id)
+					->where('session_exercise_id', $this->exercise->id)
+					->update($updates);
+
+
+		//insertscript
+		/**
+		SessionReport::create([
 					'session_exercise_id' 		=> $this->exercise->id,
 					'session_exercise_type_id'	=> $this->exercise->session_exercise_type_id,
 					'user_id'					=> $this->user->id,
@@ -427,12 +473,7 @@ class UserSessionHandler {
 					'percentage'				=> $this->user_metrics['percentage'],
 					'eye_power'					=> $this->user_metrics['eye_power'],
 				]);
-		else
-			SessionReport::where('session_id', $this->exercise->session_id)
-					->where('user_id', $this->user->id)
-					->where('session_exercise_type_id', $this->exercise->session_exercise_type_id)
-					->where('session_exercise_id', $this->exercise->id)
-					->update($updates);
+		**/
 	}
 
 	/**
@@ -500,12 +541,25 @@ class UserSessionHandler {
         				->where('session_id', $this->session->id)
         				->get()->toArray();
 
-		$type = $exercise->type->type_code == 'post-test' ? 'Post-Reading' : 'Pre-Reading';
+		$etype = $exercise->type->type_code;
+		if($etype == 'post-test')
+			$type = 'Post-Reading';
+		elseif ($etype == 'typing-test') 
+			$type = 'Typing';
+		else
+			$type = 'Pre-Reading';
 
-		return PostTest::where('type', $type)
+		$reading = PostTest::where('type', $type)
 				->where('status', 1)
-				->whereNotIn('id', $exclude)
-				->get()->random(1);
+				->whereNotIn('id', $exclude);
+
+		//check if post-test exercise is already in level,
+		//starting level 21 the system should generate short quizzes
+		//as per requirement
+		if($this->canDoComprehensionTest())
+			$reading->has('questions');
+
+		return $reading->get()->random(1);
 	}
 
 	/**
@@ -563,6 +617,29 @@ class UserSessionHandler {
 	}
 
 	/**
+	* check if the last exercise taken was a comprehension exam or if 
+	* the user reaches level 21 the system needs to check if the last exercise
+	* taken is a post-test it will then generate short quizzes
+	*
+	* @return bool
+	*
+	**/
+	public function canDoComprehensionTest()
+	{
+		if(!$this->last_report)
+			return false;
+
+		if( ($this->last_report->type->type_code == 'comprehension' &&
+			($this->last_report->ers == 0 || is_null($this->last_report->ers))) ||
+			($this->last_report->type->type_code == 'post-test' &&  
+			$this->last_report->courseSession->session >= 21 && 
+			($this->last_report->ers == 0 || is_null($this->last_report->ers)))
+		) return true;
+
+		return false;
+	}
+
+	/**
 	* generates eye exercise materials
 	* - the current logic will remain as it is
 	* - the calculations are not stated in the document requirements
@@ -582,8 +659,8 @@ class UserSessionHandler {
 			$report = $session_report->where('session_exercise_type_id', $exercise->session_exercise_type_id)
 											->first();
 
-			if($report)
-				$this->speed = ($report->eye_power /self::EMS) * self::SECS * self::FACTOR;
+		if($report)
+			$this->speed = ($report->eye_power /self::EMS) * self::SECS * self::FACTOR;
 		} else { //text exercises
 
 			$report = $session_report->where(function($q) {
@@ -597,5 +674,56 @@ class UserSessionHandler {
 		}
 
 		return Exercise::getOneExercise($exercise->exercise_id, $this->speed);
+	}
+
+	public function generateReport($type = 'session', $no = 0)
+	{
+		return $type == 'session' ? $this->generateBySession($no) : 
+				$this->generateByLevel($no);
+	}	
+
+	protected function generateBySession($session_no)
+	{
+		$this->session_no = $session_no;
+		$this->session = $this->getUserSession();
+	}
+	
+	protected function generateByLevel($level_no)
+	{
+		$sessions = CourseSession::whereHas('level', function($q) use($level_no) {
+								$q->where('level_no', $level_no);
+							})
+							->whereHas('reports', function($q) {
+								$q->where('user_id', $this->user->id);
+							})
+							->where('course_id', 3)
+							->get();
+
+		$results = [];
+		foreach($sessions as $session) {
+			foreach ($session->reports as $report) {
+				$report->session_exercise_type_id = $report->type->type;
+				$results[$session->session][] = $report;
+			}
+
+			$results[$session->session] = array_reverse($results[$session->session]);
+		}
+				/*$results[$session->session][] = [
+						'session'			=> $session->session,
+						'wpm'				=> $report->wpm,
+						'ers'				=> $report->ers,
+						'net'				=> $report->net,
+						'time_spent'		=> $report->time_spent,
+						'percentage'		=> $report->percentage,
+						'eye_power'			=> $report->eye_power,
+						'seconds'			=> $report->seconds,
+						'score'				=> $report->cscore,
+						'wordcount'			=> $report->wordcount,
+						'exercise_type'		=> $report->type->type,
+						'test_id'			=> $report->exercise_id
+					];*/
+
+
+		return $results;
 	}
 }	
