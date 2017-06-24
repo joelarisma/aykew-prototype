@@ -27,10 +27,14 @@ class UserSessionController extends BaseController {
 		$vars = $handler->generateReport($type, $no);
 
 		return View::make('dynamic.reports', [
-				'reports'	=> $vars,
+				'reports'	=> $vars['results'],
 				'type'		=> $type,
-				'no'		=> $no
-			]);
+				'no'		=> $no,
+				'avg'		=> [
+									'wpm'			=> $vars['wpm'], 
+									'comprehension' => $vars['comprehension'],
+									'ers'			=> $vars['ers']
+					]]);
 	}
 
 	public function sessionDashboard()
@@ -39,10 +43,10 @@ class UserSessionController extends BaseController {
 
 		$vars = $handler->newSession();
 
-		 $level = $section = $this->getLevelForSession($vars['current_session']);
-
 		if(is_numeric($vars))
 			return Redirect::to('/session/' . $vars);
+
+		 $level = $section = $this->getLevelForSession($vars['current_session']);
 
 		return View::make('dynamic.dashboard', [
 					'package' 	=> null,

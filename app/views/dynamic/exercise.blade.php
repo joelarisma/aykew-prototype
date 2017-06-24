@@ -53,6 +53,7 @@
     <input type="hidden" name="session_exercise_type_id" value="{{ $session_exercise->type->id }}">
     <input type="hidden" name="exercise_id" value="{{ $session_exercise->exercise_id }}">
     <input type="hidden" name="time_spend" value="{{ \Carbon\Carbon::now() }}">
+    <input type="hidden" name="seconds">
 </form>
 
 <script src="{{ URL::asset('js/howler.min.js') }}"></script>
@@ -73,6 +74,9 @@
     var superfastWpm = {{ $superfast_wpm }};
     var wordsNeeded = {{ $words }};
     var api_dir = '/course/';
+
+    var seconds = 0;
+    var secondsTimer;
 
     $(function(){
         showInstructions();
@@ -119,6 +123,11 @@
 
     // called by each exercise when started to hide instructions
     function hideInstructions() {
+        
+        secondsTimer = setInterval(() => {
+            seconds++;
+        }, 100);
+        
         $("#instructions").modal('hide');
         $(".pause_outerpanel").show();
     }
@@ -173,6 +182,8 @@
 
     function finishAll()
     {
+        clearInterval(secondsTimer);
+        $('input[name="seconds"]').val(seconds/10);
         $("#exerciseform").submit();
     }
 </script>

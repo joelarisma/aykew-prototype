@@ -248,10 +248,14 @@ class UserSessionHandler {
 				$this->session_no = $this->last_report->courseSession->session;
 		}
 
-		$session = CourseSession::with(['reports', 'exercises'])
+		$session = CourseSession::with([
+						'reports' => function($q) {
+							$q->where('user_id', $this->user->id);
+						}, 'exercises'])
 						->find($session_id);
 
 		$check_new_session = $this->session_no - $session->session;
+
 		//force to skip session or trying to go back finished sessions
 		if($check_new_session > 1 || $check_new_session < 0)
 			return $this->session_status[4];
@@ -444,7 +448,7 @@ class UserSessionHandler {
 					'ers'						=> $this->user_metrics['ers'],
 					'net'						=> $this->user_metrics['net'],
 					'seconds'					=> (isset($input['seconds']) ? $input['seconds'] : null),
-					'wordcount'					=> (isset($input['score']) ? $input['score'] : null),
+					'wordcount'					=> (isset($input['wordcount']) ? $input['wordcount'] : null),
 					'cscore'					=> (isset($input['score']) ? $input['score'] : null),
 					'time_spent'				=> $this->user_metrics['time_spent'],
 					'percentage'				=> $this->user_metrics['percentage'],
@@ -661,6 +665,7 @@ class UserSessionHandler {
 
 		if($report)
 			$this->speed = ($report->eye_power /self::EMS) * self::SECS * self::FACTOR;
+
 		} else { //text exercises
 
 			$report = $session_report->where(function($q) {
@@ -676,37 +681,151 @@ class UserSessionHandler {
 		return Exercise::getOneExercise($exercise->exercise_id, $this->speed);
 	}
 
+	public function _generateReport($type = 'session', $no = 0, $user = null)
+	{
+		$qreport = new SessionReport;
+
+		switch ($type) 
+		{
+			case 'session':
+				# code...
+				break;
+			case 'level':
+				$this->_generateByLevel($no);
+				# code...
+				break;
+			case 'org':
+				# code...
+				break;
+			case 'user':
+				# code...
+				break;
+			case 'class':
+				# code...
+				break;
+			default:
+				# code...
+				break;
+		}
+	}
+
+	//should limit to specific user/group of users/organizations
+	protected function _generateByLevel($level_no)
+	{
+		//query might change later on
+		/*$sessions = CourseSession::whereHas('level', function($q) {
+						$q->where('level_no', $level_no);
+					})
+					->where('course_id', 3)
+					->get();
+
+		foreach ($sessions as $session) 
+		{
+			$report = $session->reports
+		}*/
+		//1249.38
+		$reports = SessionReport::whereHas('courseSession', function($q) use($level_no) {
+						$q->where('course_id', 3);
+						$q->whereHas('level', function($_q) use($level_no) {
+							$_q->where('level_no', $level_no);
+						});
+					})
+					->where('user_id', $this->user->id)
+					->orderBy('updated_at', 'DESC')
+					->orderBy('created_at', 'DESC');
+
+		$q_avg = $reports;
+		$q_comprehension = $reports;
+
+		/*$wpm = $q_avg->whereHas('type', function($q) {
+					$q->whereIn('type_code',  ['post-test', 'comprehension']);
+				})->avg('wpm');
+
+		$comprehension = $q_comprehension->whereHas('type', function($q) {
+					$q->where('type_code', 'comprehension');
+				})->avg('wpm', 'percentage');
+		$count_comprehension = $q_comprehension->whereHas('type', function($q) {
+					$q->where('type_code', 'comprehension');
+				})->count();
+		
+		$ers = (1744.5000 / ($comprehension)) / $count_comprehension;
+		dd($ers);*/
+	}
+
+	/**
+	* generate report by session, level, organization, user ...
+	* 
+	*
+	*
+	*
+	**/
 	public function generateReport($type = 'session', $no = 0)
 	{
+		//$this->_generateByLevel(1);
+
 		return $type == 'session' ? $this->generateBySession($no) : 
 				$this->generateByLevel($no);
 	}	
+
 
 	protected function generateBySession($session_no)
 	{
 		$this->session_no = $session_no;
 		$this->session = $this->getUserSession();
 	}
+
+	/*protected function generateByLevel($level_no)
+	{
+		$reports = SessionReport::where('user_id', $this->user->id)
+							->whereHas('courseSession', function($q) use ($level_no) {
+								$q->where('course_id', 3);
+								$q->whereHas('level', function($_q) use ($level_no) {
+									$_q->where('level_no', $level_no);
+								});
+							})
+							->get();
+	}*/
 	
 	protected function generateByLevel($level_no)
 	{
 		$sessions = CourseSession::whereHas('level', function($q) use($level_no) {
 								$q->where('level_no', $level_no);
 							})
-							->whereHas('reports', function($q) {
+							->with(['reports' => function($q) {
 								$q->where('user_id', $this->user->id);
-							})
+							}])
 							->where('course_id', 3)
 							->get();
 
 		$results = [];
+		$wpm = [];
+		$comprehension = [];
+		$ers = [];
+
 		foreach($sessions as $session) {
-			foreach ($session->reports as $report) {
+
+			$reports = $session->reports;
+			$count_reports = $reports->count();
+			foreach ($reports as $report) {
+
+				if($count_reports < 1)
+					break;
+
 				$report->session_exercise_type_id = $report->type->type;
 				$results[$session->session][] = $report;
+
+				if(in_array($report->type->type_code, ['post-test', 'comprehension']))
+					$wpm[] = $report->wpm;
+
+				if($report->type->type_code == 'comprehension') {
+					$pct = $report->percentage / 100;
+					$comprehension[] = $pct;
+					$ers[] = $report->wpm * $pct;
+				}
 			}
 
-			$results[$session->session] = array_reverse($results[$session->session]);
+			//$results['avg_wpm'] = array_sum($wpm)/ count($wpm); 
+				$results[$session->session] = $count_reports > 0 ? array_reverse($results[$session->session]) : [];
 		}
 				/*$results[$session->session][] = [
 						'session'			=> $session->session,
@@ -723,7 +842,22 @@ class UserSessionHandler {
 						'test_id'			=> $report->exercise_id
 					];*/
 
+		//dd(round(array_sum($wpm)/count($wpm), 2));			
+		//return $results;
+		return [
+			'results'		=> $results,
+			'wpm' 			=> round(array_sum($wpm) / count($wpm), 2),
+			'comprehension' => round((array_sum($comprehension) / count($comprehension)) * 100, 2),
+			'ers'			=> round((array_sum($ers) / count($ers)), 2)
+		];
+	}
 
-		return $results;
+	public function getAverageWordPerMinute($reports)
+	{
+		/*$report_results = $reports->whereHas('types', function($q) {
+								$q->whereIn('type_code', ['post-test', 'comprehension', 'pre-test']);
+							})->get();*/
+
+		dd($reports);
 	}
 }	
