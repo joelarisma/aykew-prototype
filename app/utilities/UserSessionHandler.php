@@ -89,7 +89,7 @@ class UserSessionHandler {
 
 	public function __construct() 
 	{  
-		$this->user = (object) ['id' => '1'];
+		$this->user = (object) ['id' => '12345'];
 		$this->exercise_types = $this->getExerciseTypes();
 	}
 
@@ -285,16 +285,16 @@ class UserSessionHandler {
 
 		//next session
 		if($check_new_session == 1) {
-
 			//check if previous session is done then it means
 			//this is a new session
 			if($session->reports->count() == $session->exercises->count())
 				return $this->session_status[2];
 
 			//check ongoing session
+			//then user skipped
 			if($session->reports->count() > 0 &&
 				$session->reports->count() < $session->exercises->count())
-					return $this->session_status[3];
+					return $this->session_status[4];
 		}
 
 		return $session->session;
@@ -511,7 +511,8 @@ class UserSessionHandler {
 
 		return [
 			'ers'			=> $ers,
-			'percentage' 	=> $percentage
+			'percentage' 	=> $percentage,
+			'cscore'		=> $score
 		];
 	}
 
@@ -663,8 +664,8 @@ class UserSessionHandler {
 			$report = $session_report->where('session_exercise_type_id', $exercise->session_exercise_type_id)
 											->first();
 
-		if($report)
-			$this->speed = ($report->eye_power /self::EMS) * self::SECS * self::FACTOR;
+			if($report)
+				$this->speed = ($report->eye_power /self::EMS) * self::SECS * self::FACTOR;
 
 		} else { //text exercises
 
@@ -793,6 +794,7 @@ class UserSessionHandler {
 							})
 							->with(['reports' => function($q) {
 								$q->where('user_id', $this->user->id);
+								$q->whereIn('session_exercise_type_id', [7,8,9]);
 							}])
 							->where('course_id', 3)
 							->get();
@@ -814,7 +816,7 @@ class UserSessionHandler {
 				$report->session_exercise_type_id = $report->type->type;
 				$results[$session->session][] = $report;
 
-				if(in_array($report->type->type_code, ['post-test', 'comprehension']))
+				if(in_array($report->type->type_code, ['pre-test', 'post-test', 'comprehension']))
 					$wpm[] = $report->wpm;
 
 				if($report->type->type_code == 'comprehension') {
@@ -842,13 +844,17 @@ class UserSessionHandler {
 						'test_id'			=> $report->exercise_id
 					];*/
 
-		//dd(round(array_sum($wpm)/count($wpm), 2));			
 		//return $results;
+
+		$avg_wpm = count($wpm) > 0 ? round(array_sum($wpm) / count($wpm), 2) : 0;
+		$avg_comprehension = count($comprehension) > 0 ? round((array_sum($comprehension) / count($comprehension)) * 100, 2) : 0;
+		$avg_ers = count($ers) > 0 ? round((array_sum($ers) / count($ers)), 2) : 0;
+					
 		return [
 			'results'		=> $results,
-			'wpm' 			=> round(array_sum($wpm) / count($wpm), 2),
-			'comprehension' => round((array_sum($comprehension) / count($comprehension)) * 100, 2),
-			'ers'			=> round((array_sum($ers) / count($ers)), 2)
+			'wpm' 			=> $avg_wpm,
+			'comprehension' => $avg_comprehension,
+			'ers'			=> $avg_ers
 		];
 	}
 

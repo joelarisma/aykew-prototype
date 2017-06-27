@@ -22,17 +22,19 @@
                 		@foreach($reports as $session => $report)
 
                 		<div style="padding-bottom: 10px;" class="col-md-12">
+                		@if(count($report) > 0)
                 		<p><strong>Session {{ $session }}</strong></p>
 	                		<table style="width:100%;">
 	                			<tbody>
 	                				<tr>
 	                					<th width="16%">TEST TYPE</th>
 	                					<th width="15%">TIME SPENT (secs)</th>
-	                					<th width="13%">WORD COUNT</th>
-	                					<th>WPM</th>
-	                					<th>ERS</th>
-	                					<th>NET</th>
+	                					<th width="12%">WORD COUNT</th>
+	                					<th width="6%">WPM</th>
+	                					<th width="5%">ERS</th>
+	                					<th width="5%">NET</th>
 	                					<th>SCORE</th>
+                                        <th>TOTAL QUEST</th>
 	                					<th>PERCENTAGE</th>
 	                					<th>EYE POWER</th>
 	                				</tr>
@@ -44,13 +46,22 @@
                 							<td>{{ $exercise->wpm }}</td>
                 							<td>{{ $exercise->ers }}</td>
                 							<td>{{ $exercise->net }}</td>
-                							<td>{{ $exercise->score }}</td>
+                							<td>{{ $exercise->cscore }}</td>
+                                            <td>
+                                                @if((!is_null($exercise->percentage) || $exercise->percentage != 0) && 
+                                                    (!is_null($exercise->cscore) || $exercise->cscore != 0))
+                                                {{  round($exercise->cscore / ($exercise->percentage/100))  }}
+                                                @else
+                                                    0
+                                                @endif
+                                            </td>
 											<td>{{ $exercise->percentage }}</td>
 											<td>{{ $exercise->eye_power }}</td>
                 						</tr>
                 					@endforeach
 	                			</tbody>
 	                		</table>
+	                		@endif
 	                	</div>
                 		@endforeach
                 		<!-- table for results -->
