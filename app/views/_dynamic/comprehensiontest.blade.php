@@ -58,7 +58,7 @@
         </div>
     </div>
 </div>
-<form action="{{ url('session', $session_level) }}" method="POST" id="testform">
+<form action="{{ url('_session', $session_level) }}" method="POST" id="testform">
     <input type="hidden" name="exercise_id" value="{{ $test->id }}">
     <input type="hidden" name="session_exercise_id" value="{{ $session_exercise->id }}">
     <input type="hidden" name="session_exercise_type_id" value="{{ $session_exercise->type->id }}">

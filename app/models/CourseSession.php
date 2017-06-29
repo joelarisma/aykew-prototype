@@ -24,7 +24,7 @@ class CourseSession extends Eloquent {
 					->orderBy('created_at', 'DESC');
     }
 
-    public function level()
+    public function sessionLevel()
     {
         return $this->belongsTo('SessionLevel', 'session_level_id', 'id');
     }

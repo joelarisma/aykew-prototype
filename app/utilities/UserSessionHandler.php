@@ -51,6 +51,12 @@ class UserSessionHandler {
 	//user's last entered report
 	private $last_report;
 
+	private $report_parameters = [
+				'type'		=> null,
+				'number'	=> null,
+				'user'		=> null
+			];
+
 	//user's activity metrics
 	protected $user_metrics = [
 			'wpm' 			=> 0, //word per minute
@@ -682,75 +688,239 @@ class UserSessionHandler {
 		return Exercise::getOneExercise($exercise->exercise_id, $this->speed);
 	}
 
-	public function _generateReport($type = 'session', $no = 0, $user = null)
-	{
-		$qreport = new SessionReport;
 
-		switch ($type) 
-		{
-			case 'session':
-				# code...
-				break;
-			case 'level':
-				$this->_generateByLevel($no);
-				# code...
-				break;
-			case 'org':
-				# code...
-				break;
-			case 'user':
-				# code...
-				break;
-			case 'class':
-				# code...
-				break;
-			default:
-				# code...
-				break;
-		}
+	/************************ REPORTING ********************/
+
+	public function getWordsPerMinuteAverage()
+	{
+		$query = $this->buildReportQuery();
+
+		$wpm = $query->whereIn('session_exercise_type_id', [
+						$this->exercise_types['post-test']->id,
+						$this->exercise_types['comprehension']->id
+					])->avg('wpm');
+		
+		return $wpm ? $wpm : 0;
 	}
 
-	//should limit to specific user/group of users/organizations
-	protected function _generateByLevel($level_no)
+	public function getPercentageAverage()
 	{
-		//query might change later on
-		/*$sessions = CourseSession::whereHas('level', function($q) {
-						$q->where('level_no', $level_no);
-					})
-					->where('course_id', 3)
-					->get();
+		$query = $this->buildReportQuery();
 
-		foreach ($sessions as $session) 
-		{
-			$report = $session->reports
-		}*/
-		//1249.38
-		$reports = SessionReport::whereHas('courseSession', function($q) use($level_no) {
-						$q->where('course_id', 3);
-						$q->whereHas('level', function($_q) use($level_no) {
-							$_q->where('level_no', $level_no);
-						});
-					})
-					->where('user_id', $this->user->id)
-					->orderBy('updated_at', 'DESC')
-					->orderBy('created_at', 'DESC');
+		if(($this->report_parameters['type'] == 'level' || 
+			$this->report_parameters['type'] == 'user') &&
+			$this->report_parameters['number'] == 2) {
+				$session10 = $this->getSingleReport(10, $this->exercise_types['comprehension']->id, ['percentage']);
 
-		$q_avg = $reports;
-		$q_comprehension = $reports;
+				if($session10->count() < 1)
+					return 0;
 
-		/*$wpm = $q_avg->whereHas('type', function($q) {
-					$q->whereIn('type_code',  ['post-test', 'comprehension']);
-				})->avg('wpm');
+				$percentage = $query->where('session_exercise_type_id', 
+							$this->exercise_types['comprehension']->id
+						)->union($session10->getQuery())->get(['percentage']);
 
-		$comprehension = $q_comprehension->whereHas('type', function($q) {
-					$q->where('type_code', 'comprehension');
-				})->avg('wpm', 'percentage');
-		$count_comprehension = $q_comprehension->whereHas('type', function($q) {
-					$q->where('type_code', 'comprehension');
-				})->count();
+				if(count($percentage) < 1)
+					return 0;
+
+				$percentage = $percentage->sum('percentage') /count($percentage);
+		} else {
+
+			$percentage = $query->where('session_exercise_type_id', 
+							$this->exercise_types['comprehension']->id
+						)->avg('percentage');
+		}
+
+		//dd($percentage);
+		return $percentage ? $percentage : 0;
+	}
+
+	public function getEffectiveReadingSpeedAverage()
+	{
+		$query = $this->buildReportQuery();
+
+		if(($this->report_parameters['type'] == 'level' || 
+			$this->report_parameters['type'] == 'user') &&
+			$this->report_parameters['number'] == 2) { 
+
+			$session10 = $this->getSingleReport(10, $this->exercise_types['comprehension']->id, ['ers']);
+
+			if($session10->count() < 1)
+				return 0;
+
+			$ers = $query->where('session_exercise_type_id', 
+						$this->exercise_types['comprehension']->id
+					)->union($session10->getQuery())->get(['ers']);
+
+			if(count($ers) < 1)
+					return 0;
+
+			$ers = $ers->sum('ers') /count($ers);
+
+		} else {
+
+			$ers = $query->where('session_exercise_type_id', 
+							$this->exercise_types['comprehension']->id
+						)->avg('ers');
+		}
+
+		return $ers ? $ers : 0;
+	}
+
+	public function getSummarySpeed()
+	{
+		$query = $this->buildReportQuery();
+
+		$wpm = $query->whereIn('session_exercise_type_id', [
+						$this->exercise_types['post-test']->id,
+						$this->exercise_types['comprehension']->id
+					])
+					->orderBy('id', 'ASC')
+					->get(['wpm']);
 		
-		$ers = (1744.5000 / ($comprehension)) / $count_comprehension;
-		dd($ers);*/
+		if($wpm->count() < 1)
+			return 0;
+
+		$last = $wpm->last()->wpm;
+		$first = $wpm->first()->wpm;
+
+		return round((($last - $first)/$first) * 100, 2);
+	}
+
+	public function getSummaryComprehension()
+	{
+		$query = $this->buildReportQuery();
+
+		if(($this->report_parameters['type'] == 'level' || 
+			$this->report_parameters['type'] == 'user') &&
+			$this->report_parameters['number'] == 2) { 
+
+			$session10 = $this->getSingleReport(10, $this->exercise_types['comprehension']->id, ['percentage']);
+
+			if($session10->count() < 1)
+				return 0;
+
+			$percentage = $query->where('session_exercise_type_id', 
+						$this->exercise_types['comprehension']->id
+					)->union($session10->getQuery())->get(['percentage']);
+
+			if(count($percentage) < 1)
+					return 0;
+
+
+		} else {
+			$percentage = $query->where('session_exercise_type_id', 
+							$this->exercise_types['comprehension']->id
+						)->get(['percentage']);
+
+			if($percentage->count() < 1)
+				return 0;
+		}
+
+		$last = $percentage->last()->percentage;
+		$first = $percentage->first()->percentage;
+
+		return round((($last - $first)/$first) * 100, 2);
+	}
+
+	public function getSummaryEffectiveReadingSpeed()
+	{
+		$query = $this->buildReportQuery();
+
+		if(($this->report_parameters['type'] == 'level' || 
+			$this->report_parameters['type'] == 'user') &&
+			$this->report_parameters['number'] == 2) { 
+
+			$session10 = $this->getSingleReport(10, $this->exercise_types['comprehension']->id, ['ers']);
+
+			if($session10->count() < 1)
+				return 0;
+
+			$ers = $query->where('session_exercise_type_id', 
+						$this->exercise_types['comprehension']->id
+					)->union($session10->getQuery())->get(['ers']);
+
+			if(count($ers) < 1)
+					return 0;
+
+		} else {
+
+			$ers = $query->where('session_exercise_type_id', 
+							$this->exercise_types['comprehension']->id
+						)->get(['ers']);
+
+			if($ers->count() < 1)
+				return 0;
+		}
+
+		$last = $ers->last()->ers;
+		$first = $ers->first()->ers;
+
+		return round((($last - $first)/$first) * 100, 2);
+	}
+
+	private function getSingleReport($session_no = 0, $type = 0, $column = ['comprehension'])
+	{
+		return SessionReport::select($column)->whereHas('courseSession', function($q) use($session_no) {
+							$q->where('session', $session_no);
+						})
+						->where('user_id', $this->report_parameters['user'])
+						->where('session_exercise_type_id', $type);
+	}
+
+	//Average Speed: 242.63 Comprehension: 83.33 ERS: 223.32
+	//Average Speed: 246.83 Comprehension: 79.17 ERS: 212.87
+	public function buildReportQuery()
+	{
+		$session_report = SessionReport::query();
+
+		if($this->report_parameters['type'] == 'session')
+			$session_report->whereHas('courseSession', function($q) {
+									$q->where('session', $this->report_parameters['number']);
+								});
+		else {
+			if($this->report_parameters['number'] != 0)
+				$session_report->whereHas('courseSession', function($q) {
+										$q->whereHas('sessionLevel', function($_q) {
+											$_q->where('level_no', $this->report_parameters['number']);
+										});
+									});
+		}
+
+		$session_report->where(function($q) {
+			if(is_array($this->report_parameters['user']))
+				$q->whereIn('user_id', $this->report_parameters['user']);
+			else
+				$q->where('user_id', $this->report_parameters['user']);
+		});
+			
+		return $session_report;
+	}
+
+	/**
+	* generates the report as per user's request
+	*
+	* @param string $type defines the type of report 
+	* @param integer $no defines the level or id in respect to the type of report
+	* @param integer|array user id passed to get fetch report.
+	*
+	* @return array 
+	**/
+	public function _generateReport($type = 'session', $no = 0, $user = null)
+	{
+		$this->report_parameters = [
+				'type'		=> $type,
+				'number'	=> $no,
+				'user'		=> $user
+			];
+
+		return [
+			'avg_wpm' 				=> $this->getWordsPerMinuteAverage(),
+			'avg_comprehension' 	=> $this->getPercentageAverage(),
+			'avg_ers'				=> $this->getEffectiveReadingSpeedAverage(),
+			'summary_speed'			=> $this->getSummarySpeed(),
+			'summary_comprehension'	=> $this->getSummaryComprehension(),
+			'summary_ers'			=> $this->getSummaryEffectiveReadingSpeed()
+		];
 	}
 
 	/**
@@ -762,46 +932,30 @@ class UserSessionHandler {
 	**/
 	public function generateReport($type = 'session', $no = 0)
 	{
-		//$this->_generateByLevel(1);
-
-		return $type == 'session' ? $this->generateBySession($no) : 
-				$this->generateByLevel($no);
+		return $this->generateByLevel($no);
 	}	
 
 
-	protected function generateBySession($session_no)
-	{
-		$this->session_no = $session_no;
-		$this->session = $this->getUserSession();
-	}
-
-	/*protected function generateByLevel($level_no)
-	{
-		$reports = SessionReport::where('user_id', $this->user->id)
-							->whereHas('courseSession', function($q) use ($level_no) {
-								$q->where('course_id', 3);
-								$q->whereHas('level', function($_q) use ($level_no) {
-									$_q->where('level_no', $level_no);
-								});
-							})
-							->get();
-	}*/
-	
+	//improve report methods
 	protected function generateByLevel($level_no)
 	{
-		$sessions = CourseSession::whereHas('level', function($q) use($level_no) {
+		$sessions = CourseSession::whereHas('sessionLevel', function($q) use($level_no) {
 								$q->where('level_no', $level_no);
 							})
 							->with(['reports' => function($q) {
 								$q->where('user_id', $this->user->id);
-								$q->whereIn('session_exercise_type_id', [7,8,9]);
+								$q->whereIn('session_exercise_type_id', [
+										$this->exercise_types['pre-test']->id,
+										$this->exercise_types['post-test']->id,
+										$this->exercise_types['comprehension']->id
+									]);
 							}])
 							->where('course_id', 3)
 							->get();
 
 		$results = [];
 		$wpm = [];
-		$comprehension = [];
+		$comprehension = []; 
 		$ers = [];
 
 		foreach($sessions as $session) {
@@ -816,7 +970,7 @@ class UserSessionHandler {
 				$report->session_exercise_type_id = $report->type->type;
 				$results[$session->session][] = $report;
 
-				if(in_array($report->type->type_code, ['pre-test', 'post-test', 'comprehension']))
+				if(in_array($report->type->type_code, ['post-test', 'comprehension']))
 					$wpm[] = $report->wpm;
 
 				if($report->type->type_code == 'comprehension') {
@@ -827,7 +981,26 @@ class UserSessionHandler {
 			}
 
 			//$results['avg_wpm'] = array_sum($wpm)/ count($wpm); 
-				$results[$session->session] = $count_reports > 0 ? array_reverse($results[$session->session]) : [];
+			$results[$session->session] = $count_reports > 0 ? array_reverse($results[$session->session]) : [];
+		}
+
+		if($level_no == 2)
+		{
+			$session10 = SessionReport::with(['type'])
+							->whereHas('courseSession', function($q) {
+								$q->where('session', 10);
+							})
+							->where('user_id', $this->user->id)
+							->where('session_exercise_type_id', $this->exercise_types['comprehension']->id)
+							->orderBy('updated_at', 'DESC')
+							->orderBy('created_at', 'DESC')
+							->first();
+
+			$session10->session_exercise_type_id = $session10->type->type;
+			$results[$session10->session][] = $session10;
+			$pct = $session10->percentage / 100;
+			$comprehension[] = $pct;
+			$ers[] = $session10->wpm * $pct;
 		}
 				/*$results[$session->session][] = [
 						'session'			=> $session->session,
@@ -845,7 +1018,6 @@ class UserSessionHandler {
 					];*/
 
 		//return $results;
-
 		$avg_wpm = count($wpm) > 0 ? round(array_sum($wpm) / count($wpm), 2) : 0;
 		$avg_comprehension = count($comprehension) > 0 ? round((array_sum($comprehension) / count($comprehension)) * 100, 2) : 0;
 		$avg_ers = count($ers) > 0 ? round((array_sum($ers) / count($ers)), 2) : 0;

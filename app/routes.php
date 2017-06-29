@@ -29,7 +29,7 @@ Route::get('/session/new', 'UserSessionController@sessionDashboard');
 Route::post('/session/{session_level}', 'UserSessionController@session');
 Route::get('/session/{session_level}', 'UserSessionController@session');
 
-Route::get('/reports/{type}/{no}', 'UserSessionController@sessionReport');
+Route::get('/reports/{type}/{no}/{user_id?}', 'UserSessionController@sessionReport');
 
 Route::post('/exercise/done', function() {
 	$handler = new UserSessionHandler;

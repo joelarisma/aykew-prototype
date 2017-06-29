@@ -14,19 +14,25 @@ class UserSessionController extends BaseController {
 	|	Route::get('/', 'HomeController@showWelcome');
 	|
 	*/
+	private $view_folder = '_dynamic';
 
 	public function showWelcome()
 	{
 		return View::make('hello');
 	}
-
-	public function sessionReport($type, $no)
+	//improve logic in report;
+	//if user request reports for all students in a class
+	//if user request reports single student
+	//if user request reports single students all levels
+	public function sessionReport($type, $no, $user_id = null)
 	{
 		$handler = new UserSessionHandler;
 
-		$vars = $handler->generateReport($type, $no);
+		$def = is_null($user_id) ? 12345 : $user_id;
 
-		return View::make('dynamic.reports', [
+		$vars = $handler->_generateReport($type, $no, $def);
+		dd($vars);
+		return View::make($this->view_folder . '.reports', [
 				'reports'	=> $vars['results'],
 				'type'		=> $type,
 				'no'		=> $no,
@@ -34,7 +40,7 @@ class UserSessionController extends BaseController {
 									'wpm'			=> $vars['wpm'], 
 									'comprehension' => $vars['comprehension'],
 									'ers'			=> $vars['ers']
-					]]);
+					]]); 
 	}
 
 	public function sessionDashboard()
@@ -48,7 +54,7 @@ class UserSessionController extends BaseController {
 
 		 $level = $section = $this->getLevelForSession($vars['current_session']);
 
-		return View::make('dynamic.dashboard', [
+		return View::make($this->view_folder . '.dashboard', [
 					'package' 	=> null,
 		            'session' 	=> $vars['current_session'],
 		            'section' 	=> $section,
@@ -70,6 +76,8 @@ class UserSessionController extends BaseController {
 
 	public function session($session_level) 
 	{
+		$view_folder = 'dynamic';
+
 		$handler = new UserSessionHandler;
 
 		if(Request::isMethod('post'))
@@ -90,7 +98,7 @@ class UserSessionController extends BaseController {
 				if($exercise->type->type_code == 'pre-test') 
 				{
 					$vars = $handler->getReadingExercise($exercise);
-					$view = 'dynamic.readingspeedtest';
+					$view = $this->view_folder . '.readingspeedtest';
 					$args = [
 								'test' 				=> $vars,
 								'session_exercise' 	=> $exercise,
@@ -101,7 +109,7 @@ class UserSessionController extends BaseController {
 					if($vars = $handler->doComprehensionQuestions($exercise)) 
 					{
 
-						$view = 'dynamic.comprehensionquestiontest';
+						$view = $this->view_folder . '.comprehensionquestiontest';
 						$args = [
 									'questionData'		=> $vars['questions'],
 									'wpm' 				=> $vars['wpm'],
@@ -112,7 +120,7 @@ class UserSessionController extends BaseController {
 								];
 					} else {
 						$vars = $handler->getReadingExercise($exercise);
-						$view = 'dynamic.readingspeedtest';
+						$view = $this->view_folder . '.readingspeedtest';
 						$args = [
 									'test' 				=> $vars,
 									'session_exercise' 	=> $exercise,
@@ -123,7 +131,7 @@ class UserSessionController extends BaseController {
 				}
 			break;
 			case 'eye-speed':
-				$view = 'dynamic.eyespeedtest';
+				$view = $this->view_folder . '.eyespeedtest';
 				$args = [
 							'session_exercise'	=> $exercise,
 							'session_level' 	=> $session_level,
@@ -135,7 +143,7 @@ class UserSessionController extends BaseController {
 				//from the previous reading material
 				if($vars = $handler->doComprehensionQuestions($exercise)) {
 
-					$view = 'dynamic.comprehensionquestiontest';
+					$view = $this->view_folder . '.comprehensionquestiontest';
 					$args = [
 								'questionData'		=> $vars['questions'],
 								'wpm' 				=> $vars['wpm'],
@@ -147,7 +155,7 @@ class UserSessionController extends BaseController {
 				} else {
 
 					$vars = $handler->getComprehensionExercise($exercise);
-					$view = 'dynamic.comprehensiontest';
+					$view = $this->view_folder . '.comprehensiontest';
 					$args = [
 								'test'				=> $vars,
 								'session_exercise'	=> $exercise,
@@ -158,7 +166,7 @@ class UserSessionController extends BaseController {
 			break;
 			case 'eye-exercise':
 				$vars = $handler->getEyeExercises($exercise);
-				$view = 'dynamic.exercise';
+				$view = $this->view_folder . '.exercise';
 				$args = [
 							'ex'			=> json_encode($vars['exercise']),
 							'slow_wpm'		=> $vars['wpmspeeds']['slow_wpm'],
@@ -176,7 +184,7 @@ class UserSessionController extends BaseController {
 				$vars->description = strip_tags(html_entity_decode($vars->description));
 				$vars->content = strip_tags(html_entity_decode($vars->content));
 
-				$view = 'dynamic.typingtest';
+				$view = $this->view_folder . '.typingtest';
 				$args = [
 							'test' 				=> $vars,
 							'session_exercise' 	=> $exercise,
